@@ -246,17 +246,24 @@ namespace BrickBot.Dialogs
         {
             var reply = context.MakeMessage();
 
-            var options = new[]
+
+            reply.Attachments = new List<Attachment>();
+            List<CardImage> cardImages = new List<CardImage>();
+            cardImages.Add(new CardImage(url: $"{URL}/Images/bricklink.png"));
+            List<CardAction> cardButtons = new List<CardAction>();
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.BricklinkSet, Value = BrickBotRes.BricklinkSet, Type = "postBack" });
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.BricklinkPart, Value = BrickBotRes.BricklinkPart, Type = "postBack" });
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.BricklinkMinifig, Value = BrickBotRes.BricklinkMinifig, Type = "postBack" });
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.BricklinkBook, Value = BrickBotRes.BricklinkBook, Type = "postBack" });
+            HeroCard plCard = new HeroCard()
             {
-                BrickBotRes.BricklinkSet,
-                BrickBotRes.BricklinkPart,
-                BrickBotRes.BricklinkMinifig,
-                BrickBotRes.BricklinkBook
+                Title = "Select what you want to search",
+                //Subtitle = "Pig Latin Wikipedia Page",
+                Images = cardImages,
+                Buttons = cardButtons
             };
-            reply.AddHeroCard(
-                "Select what you want to search",
-                options); //,
-                          //new[] { $"{URL}/Images/bricklink.png" });
+            Attachment plAttachment = plCard.ToAttachment();
+            reply.Attachments.Add(plAttachment);
 
             await context.PostAsync(reply);
 
