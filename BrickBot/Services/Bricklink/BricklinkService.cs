@@ -60,20 +60,21 @@ namespace BrickBot.Services.Bricklink
                         PriceGuideItem retPrice = GetPriceGuide(retobjdeser.data.no, typedesc, false);
                         double retail_price;
                         retset.New = new PriceDetails();
-                        Double.TryParse(retPrice.avg_price, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out retail_price);
+                        Double.TryParse(retPrice?.avg_price, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out retail_price);
                         retset.New.Average = retail_price;
-                        Double.TryParse(retPrice.min_price, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out retail_price);
+                        Double.TryParse(retPrice?.min_price, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out retail_price);
                         retset.New.Min = retail_price;
-                        Double.TryParse(retPrice.max_price, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out retail_price);
+                        Double.TryParse(retPrice?.max_price, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out retail_price);
                         retset.New.Max = retail_price;
                         // so far only USD, need to implement other currencies
                         retset.New.Currency = "USD";
+                        retPrice = GetPriceGuide(retobjdeser.data.no, typedesc, true);
                         retset.Used = new PriceDetails();
-                        Double.TryParse(retPrice.avg_price, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out retail_price);
+                        Double.TryParse(retPrice?.avg_price, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out retail_price);
                         retset.Used.Average = retail_price;
-                        Double.TryParse(retPrice.min_price, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out retail_price);
+                        Double.TryParse(retPrice?.min_price, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out retail_price);
                         retset.Used.Min = retail_price;
-                        Double.TryParse(retPrice.max_price, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out retail_price);
+                        Double.TryParse(retPrice?.max_price, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out retail_price);
                         retset.Used.Max = retail_price;
                         retset.Used.Currency = "USD";
                         retset.YearReleased = retobjdeser.data.year_released;

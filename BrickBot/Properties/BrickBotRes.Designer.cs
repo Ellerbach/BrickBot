@@ -277,7 +277,7 @@ namespace BrickBot.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Thanks! Please give me couple of minutes to get your information..
+        ///   Looks up a localized string similar to Thanks! Please give me couple of seconds to get your information..
         /// </summary>
         internal static string ThanksGiveMeASec {
             get {

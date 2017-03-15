@@ -190,7 +190,7 @@
     <value>Give me the set number</value>
   </data>
   <data name="ThanksGiveMeASec" xml:space="preserve">
-    <value>Thanks! Please give me couple of minutes to get your information.</value>
+    <value>Thanks! Please give me couple of seconds to get your information.</value>
   </data>
   <data name="WelcomeAll" xml:space="preserve">
     <value>All</value>

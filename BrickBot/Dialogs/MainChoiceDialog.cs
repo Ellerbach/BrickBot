@@ -1,6 +1,7 @@
 ﻿using BrickBot.Models;
 using BrickBot.Properties;
 using BrickBot.Services.Bricklink;
+using BrickBot.Services.BricksetService;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
 using System;
@@ -211,30 +212,55 @@ namespace BrickBot.Dialogs
                 //need to implement a way to check the currncy.
                 context.PrivateConversationData.TryGetValue(BrickBotRes.CurrencyValue, out setcurrency);
                 if (retbrick.New.Average != 0)
-                    reply.Text += $"\r\n New: min {retbrick.New.Min} max {retbrick.New.Max} avg {retbrick.New.Average} {setcurrency} \r\n";
+                    reply.Text += $"\r\n New: min {retbrick.New.Min.ToString("0.00")} max {retbrick.New.Max.ToString("0.00")} avg {retbrick.New.Average.ToString("0.00")} {setcurrency} \r\n";
                 if (retbrick.Used.Average != 0)
-                    reply.Text += $"\r\n Used: min {retbrick.Used.Min} max {retbrick.Used.Max} avg {retbrick.Used.Average} {setcurrency} \r\n";
+                    reply.Text += $"\r\n Used: min {retbrick.Used.Min.ToString("0.00")} max {retbrick.Used.Max.ToString("0.00")} avg {retbrick.Used.Average.ToString("0.00")} {setcurrency} \r\n";
             }
             else if ((retbrick.BrickService == ServiceProvider.Brickset) || (retbrick.BrickService == ServiceProvider.Rebrickable) || (retbrick.BrickService == ServiceProvider.Peeron))
             {
                 if (retbrick.Instructions != null)
                 {
-                    reply.Text = $"Here are available instructions for {retbrick.Name} - {retbrick.Number}: \r\n";
+                    //reply.Text = $"Here are available instructions for {retbrick.Name} - {retbrick.Number}: \r\n";
+                    reply.Attachments = new List<Attachment>();
+                    List<CardAction> cardAction= new List<CardAction>();
                     foreach (var inst in retbrick.Instructions)
                     {
-                        reply.Text += $"{inst.Name}: {inst.URL} \r\n";
+                        cardAction.Add(new CardAction() { Title = inst.Name, Value = inst.URL, Type = "openUrl" });
+                        //reply.Text += $"{inst.Name}: {inst.URL} \r\n";
                     }
+                    List<CardImage> cardImages = new List<CardImage>();
+                    cardImages.Add(new CardImage(url: retbrick.ThumbnailUrl));
+                    HeroCard plCard = new HeroCard()
+                    {
+                        Title = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n",
+                        Images = cardImages,
+                        Buttons = cardAction
+                        
+                    };
+                    reply.Attachments.Add(plCard.ToAttachment());
                 }
                 else
                 {
+                    if (retbrick.ThumbnailUrl != "")
+                    {
+                        reply.Attachments = new List<Attachment>();
+                        List<CardImage> cardImages = new List<CardImage>();
+                        cardImages.Add(new CardImage(url: retbrick.ThumbnailUrl));
+                        HeroCard plCard = new HeroCard()
+                        {
+                            Title = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n",
+                            Images = cardImages
+                        };
+                        reply.Attachments.Add(plCard.ToAttachment());
+                    }
                     reply.Text = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n";
                     if (retbrick.YearReleased != 0)
                         reply.Text += $"Year {retbrick.YearReleased} \r\n";
-                    if (retbrick.ThumbnailUrl != "")
-                        reply.Attachments.Add(new Attachment(retbrick.ThumbnailUrl));
+
                     reply.Text += $"Theme {retbrick.Theme} \r\n";
-                    if (retbrick.Color != "")
-                        reply.Text += $"Color {retbrick.Color} \r\n";
+                    if (retbrick.Color != null)
+                        if (retbrick.Color != "")
+                            reply.Text += $"Color {retbrick.Color} \r\n";
                 }
             }
 
@@ -245,8 +271,6 @@ namespace BrickBot.Dialogs
         private async Task Bricklink(IDialogContext context)
         {
             var reply = context.MakeMessage();
-
-
             reply.Attachments = new List<Attachment>();
             List<CardImage> cardImages = new List<CardImage>();
             cardImages.Add(new CardImage(url: $"{URL}/Images/bricklink.png"));
@@ -395,16 +419,21 @@ namespace BrickBot.Dialogs
         {
             var reply = context.MakeMessage();
 
-            var options = new[]
+            reply.Attachments = new List<Attachment>();
+            List<CardImage> cardImages = new List<CardImage>();
+            cardImages.Add(new CardImage(url: $"{URL}/Images/brickset.png"));
+            List<CardAction> cardButtons = new List<CardAction>();
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.BricksetSet, Value = BrickBotRes.BricksetSet, Type = "postBack" });
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.BricksetInstructions, Value = BrickBotRes.BricksetInstructions, Type = "postBack" });
+            HeroCard plCard = new HeroCard()
             {
-                BrickBotRes.BricksetSet,
-                BrickBotRes.BricksetInstructions
+                Title = "Select what you want to search",
+                //Subtitle = "Pig Latin Wikipedia Page",
+                Images = cardImages,
+                Buttons = cardButtons
             };
-            reply.AddHeroCard(
-                "Select what you want to search",
-                options,
-                new[] { $"{URL}/Images/brickset.png" });
-
+            Attachment plAttachment = plCard.ToAttachment();
+            reply.Attachments.Add(plAttachment);
             await context.PostAsync(reply);
 
             context.Wait(this.OnOptionSelectedBrickset);
@@ -413,23 +442,91 @@ namespace BrickBot.Dialogs
         private async Task OnOptionSelectedBrickset(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
             var message = await result;
-            var reply = context.MakeMessage();
-            string strresp = "You have selected ";
+            //var reply = context.MakeMessage();
+            //string strresp = "You have selected ";
+            string retstr = "";
 
             if (message.Text == BrickBotRes.BricksetSet)
             {
-                strresp += "Set ";
+                retstr = BrickBotRes.SetNumber;
+                //strresp += "Set ";
             }
             else if (message.Text == BrickBotRes.BricksetInstructions)
             {
-                strresp += "Instructions ";
+                retstr = BrickBotRes.InstructionsNumber;
+                //strresp += "Instructions ";
+            }
+            context.PrivateConversationData.SetValue(BrickBotRes.WhatSearFor, message.Text);
+            //reply.Text = strresp;
+            //reply.TextFormat = "markdown";
+            //await context.PostAsync(reply);
+            //context.Wait(MessageReceivedAsync);
+            if (retstr != "")
+                PromptDialog.Text(context, this.ResumeAfterBrickset, retstr);
+            else
+                await this.WelcomeMessageAsync(context);
+        }
+
+        private async Task ResumeAfterBrickset(IDialogContext context, IAwaitable<string> result)
+        {
+            try
+            {
+                var number = await result;
+                var reply = context.MakeMessage();
+                string strresp = "";
+                //need to check the currency in real!
+                await context.PostAsync(BrickBotRes.ThanksGiveMeASec);
+                //find what was requested
+                string whatyouwant;
+                //need to implement a way to check the currncy.
+                context.PrivateConversationData.TryGetValue(BrickBotRes.WhatSearFor, out whatyouwant);
+                BricksetServiceAPI bs = new BricksetServiceAPI();
+
+                if (whatyouwant == BrickBotRes.BricksetSet)
+                {
+                    var retbrick = bs.getSets(number);
+                    if (retbrick == null)
+                    {
+                        number += "-1";
+                        retbrick = bs.getSets(number);
+                    }
+                    if (retbrick == null)
+                        reply.Text = BrickBotRes.SearchError;
+                    else
+                    {
+                        reply = BuildMessage(context, retbrick);
+                    }
+                }
+                else if (whatyouwant == BrickBotRes.BricksetInstructions)
+                {
+                    var retbrick = bs.getInstructions(number);
+                    if (retbrick == null)
+                    {
+                        number += "-1";
+                        retbrick = bs.getInstructions(number);
+                    }
+                    if (retbrick == null)
+                        reply.Text = BrickBotRes.SearchError;
+                    else
+                    {
+                        reply = BuildMessage(context, retbrick);
+                    }
+                }
+                else
+                {
+                    reply.Text = BrickBotRes.BrickBotError;
+                }
+
+                //reply.Text = strresp;
+                reply.TextFormat = "markdown";
+                await context.PostAsync(reply);
+            }
+            catch (Exception ex)
+            {
+                await context.PostAsync(BrickBotRes.BrickBotError + $"{ex.Message}");
             }
 
-            reply.Text = strresp;
-            reply.TextFormat = "markdown";
-            await context.PostAsync(reply);
-            //context.Wait(MessageReceivedAsync);
-            await this.WelcomeMessageAsync(context);
+            context.Wait(this.MessageReceivedAsync);
         }
 
         #endregion

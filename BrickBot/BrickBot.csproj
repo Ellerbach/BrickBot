@@ -148,6 +148,8 @@
     </None>
     <Content Include="default.htm" />
     <Content Include="Global.asax" />
+    <Content Include="Images\bricklink.png" />
+    <Content Include="Images\bricklogo.png" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -190,6 +192,7 @@
   <ItemGroup>
     <Content Include="packages.config" />
     <None Include="Connected Services\BricksetService\v2.wsdl" />
+    <None Include="Properties\PublishProfiles\BrickBot - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -204,7 +207,6 @@
     <WCFMetadataStorage Include="Connected Services\BricksetService\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Images\" />
     <Folder Include="Models\Brickset\" />
     <Folder Include="Models\Peeron\" />
     <Folder Include="Models\Rebrickable\" />

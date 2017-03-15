@@ -1,4 +1,5 @@
 ﻿using BrickBot.BricksetService;
+using BrickBot.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -7,7 +8,7 @@ using System.Web;
 
 namespace BrickBot.Services.BricksetService
 {
-    public class BricksetService
+    public class BricksetServiceAPI
     {
 
         private string userHash;
@@ -19,7 +20,7 @@ namespace BrickBot.Services.BricksetService
 
         public bool isLogged { get; internal set; }
 
-        public BricksetService()
+        public BricksetServiceAPI()
         {
             bsAPI = new BricksetAPIv2SoapClient();
             //userHash = bsAPI.login(apikey, username, password);
@@ -30,10 +31,52 @@ namespace BrickBot.Services.BricksetService
             //}
         }
 
-        public sets[] getSets(string number)
+        public BrickItem getSets(string number)
         {
-            return bsAPI.getSets(apikey, "", "", "", "", $"{number}", "", "", "", "", "", "", "");
+            var ret = bsAPI.getSets(apikey, "", "", "", "", $"{number}", "", "", "", "", "", "", "");
+            if (ret == null)
+                return null;
+            BrickItem retitem = new BrickItem();
+            retitem.Number = number;
+            retitem.Name = ret[0].name;
+            retitem.BrickService = ServiceProvider.Brickset;
+            retitem.ItemType = ItemType.Set;
+            retitem.Theme = ret[0].theme;
+            retitem.ThumbnailUrl = ret[0].thumbnailURL;
+            int years;
+            int.TryParse(ret[0].year, out years);
+            retitem.YearReleased = years;
+            return retitem;
 
+        }
+
+        public BrickItem getInstructions(string number)
+        {
+            var ret = bsAPI.getSets(apikey, "", "", "", "", $"{number}", "", "", "", "", "", "", "");
+            if (ret == null)
+                return null;
+            BrickItem retitem = new BrickItem();
+            retitem.Number = number;
+            retitem.Name = ret[0].name;
+            if (ret[0].instructionsCount > 0)
+            {
+                var instruct = bsAPI.getInstructions(apikey, ret[0].setID);
+                retitem.Instructions = new SetInstruction[ret[0].instructionsCount];
+                for (int i = 0; i < instruct.Length; i++)
+                {
+                    retitem.Instructions[i] = new SetInstruction();
+                    retitem.Instructions[i].Name = instruct[i].description;
+                    retitem.Instructions[i].URL = instruct[i].URL;
+                }
+            }
+            retitem.BrickService = ServiceProvider.Brickset;
+            retitem.ItemType = ItemType.Set;
+            retitem.Theme = ret[0].theme;
+            retitem.ThumbnailUrl = ret[0].thumbnailURL;
+            int years;
+            int.TryParse(ret[0].year, out years);
+            retitem.YearReleased = years;
+            return retitem;
 
         }
     }
