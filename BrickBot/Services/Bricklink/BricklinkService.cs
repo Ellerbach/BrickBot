@@ -15,6 +15,7 @@ namespace BrickBot.Services.Bricklink
     {
 
         public static ColorItem[] coloritems = GetColor();
+        public static Category[] categories = GetCategories();
 
         public bool isAuthenticated { get; internal set; }
 
@@ -39,8 +40,22 @@ namespace BrickBot.Services.Bricklink
                         retset.Number = retobjdeser.data.no;
                         retset.Name = retobjdeser.data.name;
                         retset.ThumbnailUrl = retobjdeser.data.thumbnail_url;
+                        //clean URL, sometimes it comes without the http
+                        if (retset.ThumbnailUrl.Length>0)
+                            if(retset.ThumbnailUrl.IndexOf("http",StringComparison.CurrentCultureIgnoreCase)<0)
+                            {
+                                retset.ThumbnailUrl = "http:" + retset.ThumbnailUrl;
+                            }
                         //need to implement category names
-                        retset.Theme = retobjdeser.data.category_id.ToString();
+                        try
+                        {
+                            retset.Theme = categories.Where(x => x.category_id == retobjdeser.data.category_id).First().category_name;
+
+                        }
+                        catch (Exception)
+                        {
+                            retset.Theme ="";
+                        }
                         //get all the prices details
                         PriceGuideItem retPrice = GetPriceGuide(retobjdeser.data.no, typedesc, false);
                         double retail_price;
@@ -144,6 +159,28 @@ namespace BrickBot.Services.Bricklink
                     if (retobjdeser.meta.message == "OK")
                         return retobjdeser.data;
                     //System.Threading.Thread.Sleep(1000);
+                }
+                return null;
+            }
+            catch (Exception)
+            { return null; }
+        }
+
+        static public Category[] GetCategories(int categorie = -1)
+        {
+            try
+            {
+                string url = $"https://api.bricklink.com/api/store/v1/categories";
+                if (categorie >= 0)
+                    url += "/" + categorie.ToString();
+                //WebParameterCollection param = new WebParameterCollection();
+                for (int i = 0; i < retry; i++)
+                {
+                    var strret = ExecuteRequest(url);
+                    var retobjdeser = Newtonsoft.Json.JsonConvert.DeserializeObject<CategoryMain>(strret);
+                    Debug.WriteLine($"{retobjdeser.meta.message}, {retobjdeser.meta.description}, {retobjdeser.meta.code}");
+                    if (retobjdeser.meta.message == "OK")
+                        return retobjdeser.data;
                 }
                 return null;
             }

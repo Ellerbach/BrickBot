@@ -5,8 +5,9 @@ using System.Web;
 
 namespace BrickBot.Models
 {
-    public enum ServiceProvider
+    public class SetInstruction
     {
-        Bricklink = 0, Brickset, Rebrickable, Peeron, All
+        public string Name { get; set; }
+        public string URL { get; set; }
     }
 }

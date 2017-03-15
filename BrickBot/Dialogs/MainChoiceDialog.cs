@@ -50,17 +50,17 @@ namespace BrickBot.Dialogs
                     await context.PostAsync(reply);
                 }
 
-                string currency;
+                //string currency;
 
-                if ((!context.PrivateConversationData.TryGetValue(BrickBotRes.CurrencyValue, out currency)))
-                {
-                    PromptDialog.Text(context, this.ResumeAfterCurrency, BrickBotRes.CurrencyGiveMeCurrency);
-                    return;
-                }
-                else
-                {
-                    //myWivaldy.Connection = currency;
-                }
+                //if ((!context.PrivateConversationData.TryGetValue(BrickBotRes.CurrencyValue, out currency)))
+                //{
+                //    PromptDialog.Text(context, this.ResumeAfterCurrency, BrickBotRes.CurrencyGiveMeCurrency);
+                //    return;
+                //}
+                //else
+                //{
+                //    //myWivaldy.Connection = currency;
+                //}
 
                 if (message.Text == BrickBotRes.WelcomeBricklink)
                 {
@@ -104,19 +104,25 @@ namespace BrickBot.Dialogs
         {
             var reply = context.MakeMessage();
 
-            var options = new[]
+            reply.Attachments = new List<Attachment>();
+            List<CardImage> cardImages = new List<CardImage>();
+            cardImages.Add(new CardImage(url: $"{URL}/Images/bricklogo.png"));
+            List<CardAction> cardButtons = new List<CardAction>();
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.WelcomeBricklink, Value = BrickBotRes.WelcomeBricklink, Type = "postBack" });
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.WelcomeBrickset, Value = BrickBotRes.WelcomeBrickset, Type = "postBack" });
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.WelcomeRebrickable, Value = BrickBotRes.WelcomeRebrickable, Type = "postBack" });
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.WelcomePeeron, Value = BrickBotRes.WelcomePeeron, Type = "postBack" });
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.WelcomeAll, Value = BrickBotRes.WelcomeAll, Type = "postBack" });
+            HeroCard plCard = new HeroCard()
             {
-                BrickBotRes.WelcomeBricklink,
-                BrickBotRes.WelcomeBrickset,
-                BrickBotRes.WelcomeRebrickable,
-                BrickBotRes.WelcomeAll,
-                BrickBotRes.WelcomeBricklink
+                Title = "Select the service youn want to search",
+                //Subtitle = "Pig Latin Wikipedia Page",
+                Images = cardImages,
+                Buttons = cardButtons
             };
-            reply.AddHeroCard(
-                "Welcome to BrickBot",
-                "Select your provider",
-                options); //,
-                          //new[] { $"{URL}/Images/bricklogo.png" });
+
+            Attachment plAttachment = plCard.ToAttachment();
+            reply.Attachments.Add(plAttachment);
 
             await context.PostAsync(reply);
 
@@ -179,20 +185,59 @@ namespace BrickBot.Dialogs
         private IMessageActivity BuildMessage(IDialogContext context, BrickItem retbrick)
         {
             var reply = context.MakeMessage();
-            reply.Text = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n";
-            reply.Text = $"Year {retbrick.YearReleased} \r\n";
-            if (retbrick.ThumbnailUrl != "")
-                reply.Attachments.Add(new Attachment(retbrick.ThumbnailUrl));
-            reply.Text = $"Theme {retbrick.Theme} \r\n";
-            if (retbrick.Color != "")
-                reply.Text = $"Color {retbrick.Color} \r\n";
             if (retbrick.BrickService == ServiceProvider.Bricklink)
             {
+                if (retbrick.ThumbnailUrl != "")
+                {
+                    reply.Attachments = new List<Attachment>();
+                    List<CardImage> cardImages = new List<CardImage>();
+                    cardImages.Add(new CardImage(url: retbrick.ThumbnailUrl));
+                    HeroCard plCard = new HeroCard()
+                    {
+                        Title = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n",
+                        Images = cardImages
+                    };
+                    reply.Attachments.Add(plCard.ToAttachment());
+                }
+                else
+                    reply.Text += $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n";
+                reply.Text += $"\r\nTheme {retbrick.Theme} \r\n";
+                if (retbrick.YearReleased != 0)
+                    reply.Text += $"\r\n Year {retbrick.YearReleased} \r\n";
+                if (retbrick.Color != null)
+                    if (retbrick.Color != "")
+                        reply.Text += $"\r\n Color {retbrick.Color} \r\n";
+                string setcurrency;
+                //need to implement a way to check the currncy.
+                context.PrivateConversationData.TryGetValue(BrickBotRes.CurrencyValue, out setcurrency);
                 if (retbrick.New.Average != 0)
-                    reply.Text = $"New: min {retbrick.New.Min} max {retbrick.New.Max} avg {retbrick.New.Average} \r\n";
+                    reply.Text += $"\r\n New: min {retbrick.New.Min} max {retbrick.New.Max} avg {retbrick.New.Average} {setcurrency} \r\n";
                 if (retbrick.Used.Average != 0)
-                    reply.Text = $"Used: min {retbrick.Used.Min} max {retbrick.Used.Max} avg {retbrick.Used.Average} \r\n";
+                    reply.Text += $"\r\n Used: min {retbrick.Used.Min} max {retbrick.Used.Max} avg {retbrick.Used.Average} {setcurrency} \r\n";
             }
+            else if ((retbrick.BrickService == ServiceProvider.Brickset) || (retbrick.BrickService == ServiceProvider.Rebrickable) || (retbrick.BrickService == ServiceProvider.Peeron))
+            {
+                if (retbrick.Instructions != null)
+                {
+                    reply.Text = $"Here are available instructions for {retbrick.Name} - {retbrick.Number}: \r\n";
+                    foreach (var inst in retbrick.Instructions)
+                    {
+                        reply.Text += $"{inst.Name}: {inst.URL} \r\n";
+                    }
+                }
+                else
+                {
+                    reply.Text = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n";
+                    if (retbrick.YearReleased != 0)
+                        reply.Text += $"Year {retbrick.YearReleased} \r\n";
+                    if (retbrick.ThumbnailUrl != "")
+                        reply.Attachments.Add(new Attachment(retbrick.ThumbnailUrl));
+                    reply.Text += $"Theme {retbrick.Theme} \r\n";
+                    if (retbrick.Color != "")
+                        reply.Text += $"Color {retbrick.Color} \r\n";
+                }
+            }
+
             return reply;
         }
 
@@ -209,10 +254,9 @@ namespace BrickBot.Dialogs
                 BrickBotRes.BricklinkBook
             };
             reply.AddHeroCard(
-                "Bricklink",
                 "Select what you want to search",
-                options,
-                new[] { $"{URL}/Images/bricklink.png" });
+                options); //,
+                          //new[] { $"{URL}/Images/bricklink.png" });
 
             await context.PostAsync(reply);
 
@@ -222,35 +266,35 @@ namespace BrickBot.Dialogs
         private async Task OnOptionSelectedBricklink(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
             var message = await result;
-            var reply = context.MakeMessage();
-            string strresp = "You have selected ";
+            //var reply = context.MakeMessage();
+            //string strresp = "You have selected ";
             string retstr = "";
 
             if (message.Text == BrickBotRes.BricklinkSet)
             {
                 retstr = BrickBotRes.SetNumber;
-                strresp += "Set ";
+                //strresp += "Set ";
             }
             else if (message.Text == BrickBotRes.BricklinkPart)
             {
                 retstr = BrickBotRes.PartNumber;
-                strresp += "Part ";
+                //strresp += "Part ";
             }
             else if (message.Text == BrickBotRes.BricklinkMinifig)
             {
                 retstr = BrickBotRes.MinifigNumber;
-                strresp += "Minifig ";
+                //strresp += "Minifig ";
             }
             else if (message.Text == BrickBotRes.BricklinkBook)
             {
                 retstr = BrickBotRes.BookNumber;
-                strresp += "Book ";
+                //strresp += "Book ";
             }
 
-            context.ConversationData.SetValue(BrickBotRes.WhatSearFor, message.Text);
-            reply.Text = strresp;
-            reply.TextFormat = "markdown";
-            await context.PostAsync(reply);
+            context.PrivateConversationData.SetValue(BrickBotRes.WhatSearFor, message.Text);
+            //reply.Text = strresp;
+            //reply.TextFormat = "markdown";
+            //await context.PostAsync(reply);
             //context.Wait(MessageReceivedAsync);
             if (retstr != "")
                 PromptDialog.Text(context, this.ResumeAfterBricklink, retstr);
@@ -282,7 +326,7 @@ namespace BrickBot.Dialogs
                         retbrick = bs.GetCatalogItem(number, Models.Bricklink.TypeDescription.SET);
                     }
                     if (retbrick == null)
-                        reply.Text = BrickBotRes.BrickBotError;
+                        reply.Text = BrickBotRes.SearchError;
                     else
                     {
                         reply = BuildMessage(context, retbrick);
@@ -290,14 +334,35 @@ namespace BrickBot.Dialogs
                 }
                 else if (whatyouwant == BrickBotRes.BricklinkPart)
                 {
+                    var retbrick = bs.GetCatalogItem(number, Models.Bricklink.TypeDescription.PART);
+                    if (retbrick == null)
+                        reply.Text = BrickBotRes.SearchError;
+                    else
+                    {
+                        reply = BuildMessage(context, retbrick);
+                    }
 
                 }
                 else if (whatyouwant == BrickBotRes.BricklinkMinifig)
                 {
+                    var retbrick = bs.GetCatalogItem(number, Models.Bricklink.TypeDescription.MINIFIG);
+                    if (retbrick == null)
+                        reply.Text = BrickBotRes.SearchError;
+                    else
+                    {
+                        reply = BuildMessage(context, retbrick);
+                    }
 
                 }
                 else if (whatyouwant == BrickBotRes.BricklinkBook)
                 {
+                    var retbrick = bs.GetCatalogItem(number, Models.Bricklink.TypeDescription.BOOK);
+                    if (retbrick == null)
+                        reply.Text = BrickBotRes.SearchError;
+                    else
+                    {
+                        reply = BuildMessage(context, retbrick);
+                    }
 
                 }
                 else
@@ -305,7 +370,7 @@ namespace BrickBot.Dialogs
                     reply.Text = BrickBotRes.BrickBotError;
                 }
 
-                reply.Text = strresp;
+                //reply.Text = strresp;
                 reply.TextFormat = "markdown";
                 await context.PostAsync(reply);
             }
@@ -329,7 +394,6 @@ namespace BrickBot.Dialogs
                 BrickBotRes.BricksetInstructions
             };
             reply.AddHeroCard(
-                "Brickset",
                 "Select what you want to search",
                 options,
                 new[] { $"{URL}/Images/brickset.png" });
@@ -374,7 +438,6 @@ namespace BrickBot.Dialogs
                 BrickBotRes.RebrickableMoc
             };
             reply.AddHeroCard(
-                "Rebrickable",
                 "Select what you want to search",
                 options,
                 new[] { $"{URL}/Images/Rebrickable.png" });
@@ -421,7 +484,6 @@ namespace BrickBot.Dialogs
                 BrickBotRes.PeeronInstructions
             };
             reply.AddHeroCard(
-                "Rebrickable",
                 "Select what you want to search",
                 options,
                 new[] { $"{URL}/Images/Rebrickable.png" });
@@ -464,7 +526,6 @@ namespace BrickBot.Dialogs
                 BrickBotRes.AllInstructions
             };
             reply.AddHeroCard(
-                "All services",
                 "Select what you want to search",
                 options,
                 new[] { $"{URL}/Images/Rebrickable.png" });

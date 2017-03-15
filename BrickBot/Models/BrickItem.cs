@@ -12,7 +12,7 @@ namespace BrickBot.Models
         public string Theme { get; set; }
         public string ThumbnailUrl { get; set; }
         public int YearReleased { get; set; }
-        public string InstructionUrl { get; set; }
+        public SetInstruction[] Instructions{ get; set; }
         public PriceDetails New { get; set; }
         public PriceDetails Used { get; set; }
         public string Color { get; set; }

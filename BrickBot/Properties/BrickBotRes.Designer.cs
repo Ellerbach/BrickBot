@@ -88,7 +88,7 @@ namespace BrickBot.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Brick brack broke, looks like something broke: .
+        ///   Looks up a localized string similar to Brick brack broke, looks like something broke..
         /// </summary>
         internal static string BrickBotError {
             get {
@@ -255,6 +255,15 @@ namespace BrickBot.Properties {
         internal static string RebrickableSet {
             get {
                 return ResourceManager.GetString("RebrickableSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Brick broke, can&apos;t find what you&apos;re looking for. Please try again maybe with another number!.
+        /// </summary>
+        internal static string SearchError {
+            get {
+                return ResourceManager.GetString("SearchError", resourceCulture);
             }
         }
         
