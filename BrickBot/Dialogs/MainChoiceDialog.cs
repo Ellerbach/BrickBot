@@ -108,7 +108,7 @@ namespace BrickBot.Dialogs
 
             reply.Attachments = new List<Attachment>();
             List<CardImage> cardImages = new List<CardImage>();
-            cardImages.Add(new CardImage(url: $"{URL}/Images/bricklogo.png"));
+            cardImages.Add(new CardImage(url: $"{URL}/Images/bricklogo-small.png"));
             List<CardAction> cardButtons = new List<CardAction>();
             cardButtons.Add(new CardAction() { Title = BrickBotRes.WelcomeBricklink, Value = BrickBotRes.WelcomeBricklink, Type = "postBack" });
             cardButtons.Add(new CardAction() { Title = BrickBotRes.WelcomeBrickset, Value = BrickBotRes.WelcomeBrickset, Type = "postBack" });
@@ -428,7 +428,8 @@ namespace BrickBot.Dialogs
                 await context.PostAsync(BrickBotRes.BrickBotError + $"{ex.Message}");
             }
 
-            context.Wait(this.MessageReceivedAsync);
+            //context.Wait(this.MessageReceivedAsync);
+            await this.WelcomeMessageAsync(context);
         }
 
         #endregion
@@ -537,7 +538,8 @@ namespace BrickBot.Dialogs
                 await context.PostAsync(BrickBotRes.BrickBotError + $"{ex.Message}");
             }
 
-            context.Wait(this.MessageReceivedAsync);
+            //context.Wait(this.MessageReceivedAsync);
+            await this.WelcomeMessageAsync(context);
         }
 
         #endregion
@@ -548,7 +550,7 @@ namespace BrickBot.Dialogs
             var reply = context.MakeMessage();
             reply.Attachments = new List<Attachment>();
             List<CardImage> cardImages = new List<CardImage>();
-            cardImages.Add(new CardImage(url: $"{URL}/Images/brickset.png"));
+            cardImages.Add(new CardImage(url: $"{URL}/Images/rebrickable.png"));
             List<CardAction> cardButtons = new List<CardAction>();
             cardButtons.Add(new CardAction() { Title = BrickBotRes.RebrickableSet, Value = BrickBotRes.RebrickableSet, Type = "postBack" });
             cardButtons.Add(new CardAction() { Title = BrickBotRes.RebrickablePart, Value = BrickBotRes.RebrickablePart, Type = "postBack" });
@@ -676,7 +678,8 @@ namespace BrickBot.Dialogs
                 await context.PostAsync(BrickBotRes.BrickBotError + $"{ex.Message}");
             }
 
-            context.Wait(this.MessageReceivedAsync);
+            //context.Wait(this.MessageReceivedAsync);
+            await this.WelcomeMessageAsync(context);
         }
         #endregion
 
@@ -693,7 +696,7 @@ namespace BrickBot.Dialogs
             reply.AddHeroCard(
                 "Select what you want to search",
                 options,
-                new[] { $"{URL}/Images/Rebrickable.png" });
+                new[] { $"{URL}/Images/rebrickable.png" });
 
             await context.PostAsync(reply);
 
@@ -719,6 +722,7 @@ namespace BrickBot.Dialogs
             reply.TextFormat = "markdown";
             await context.PostAsync(reply);
             //context.Wait(MessageReceivedAsync);
+            //await this.WelcomeMessageAsync(context);
             await this.WelcomeMessageAsync(context);
         }
         #endregion

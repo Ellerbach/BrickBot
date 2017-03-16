@@ -149,7 +149,10 @@
     <Content Include="default.htm" />
     <Content Include="Global.asax" />
     <Content Include="Images\bricklink.png" />
+    <Content Include="Images\bricklogo-small.png" />
     <Content Include="Images\bricklogo.png" />
+    <Content Include="Images\peeron.png" />
+    <Content Include="Images\rebrickable.png" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
