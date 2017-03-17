@@ -151,6 +151,7 @@
     <Content Include="Images\bricklink.png" />
     <Content Include="Images\bricklogo-small.png" />
     <Content Include="Images\bricklogo.png" />
+    <Content Include="Images\brickset.png" />
     <Content Include="Images\peeron.png" />
     <Content Include="Images\rebrickable.png" />
     <Content Include="Web.config">
