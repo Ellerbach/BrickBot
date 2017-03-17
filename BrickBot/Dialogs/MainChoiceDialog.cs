@@ -730,8 +730,6 @@ namespace BrickBot.Dialogs
             {
                 var number = await result;
                 var reply = context.MakeMessage();
-                string strresp = "";
-                //need to check the currency in real!
                 await context.PostAsync(BrickBotRes.ThanksGiveMeASec);
                 //find what was requested
                 string whatyouwant;
@@ -772,42 +770,129 @@ namespace BrickBot.Dialogs
         private async Task BrickAll(IDialogContext context)
         {
             var reply = context.MakeMessage();
-
-            var options = new[]
+            reply.Attachments = new List<Attachment>();
+            List<CardImage> cardImages = new List<CardImage>();
+            cardImages.Add(new CardImage(url: $"{URL}/Images/bricklogo.png"));
+            List<CardAction> cardButtons = new List<CardAction>();
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.AllSet, Value = BrickBotRes.AllSet, Type = "postBack" });
+            cardButtons.Add(new CardAction() { Title = BrickBotRes.AllInstructions, Value = BrickBotRes.AllInstructions, Type = "postBack" });
+            HeroCard plCard = new HeroCard()
             {
-                BrickBotRes.AllSet,
-                BrickBotRes.AllInstructions
+                Title = "Select what you want to search",
+                //Subtitle = "Pig Latin Wikipedia Page",
+                Images = cardImages,
+                Buttons = cardButtons
             };
-            reply.AddHeroCard(
-                "Select what you want to search",
-                options,
-                new[] { $"{URL}/Images/rebrickable.png" });
-
+            Attachment plAttachment = plCard.ToAttachment();
+            reply.Attachments.Add(plAttachment);
             await context.PostAsync(reply);
-
             context.Wait(this.OnOptionSelectedBrickAll);
+
         }
 
         private async Task OnOptionSelectedBrickAll(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
             var message = await result;
-            var reply = context.MakeMessage();
-            string strresp = "You have selected ";
-
+            string retstr = "";
             if (message.Text == BrickBotRes.AllSet)
             {
-                strresp += "Set ";
+                retstr = BrickBotRes.SetNumber;
             }
             else if (message.Text == BrickBotRes.AllInstructions)
             {
-                strresp += "Instructions ";
+                retstr = BrickBotRes.InstructionsNumber;
+            }
+            context.PrivateConversationData.SetValue(BrickBotRes.WhatSearFor, message.Text);
+            if (retstr != "")
+                PromptDialog.Text(context, this.ResumeAfterAll, retstr);
+            else
+                await this.WelcomeMessageAsync(context);
+        }
+
+        private async Task ResumeAfterAll(IDialogContext context, IAwaitable<string> result)
+        {
+            try
+            {
+                var number = await result;
+                var reply = context.MakeMessage();
+                await context.PostAsync(BrickBotRes.ThanksGiveMeASec);
+                //find what was requested
+                string whatyouwant;
+                //need to implement a way to check the currncy.
+                context.PrivateConversationData.TryGetValue(BrickBotRes.WhatSearFor, out whatyouwant);
+
+                if ((whatyouwant == BrickBotRes.AllSet) || (whatyouwant == BrickBotRes.AllInstructions))
+                {
+                    //need to make the services similar to be able to call generic function
+                    //so far old way
+                    BricklinkService bricklink = new BricklinkService();
+                    var retbrick = bricklink.GetCatalogItem(number, Models.Bricklink.TypeDescription.SET);
+                    if (retbrick == null)
+                    {
+                        number += "-1";
+                        retbrick = bricklink.GetCatalogItem(number, Models.Bricklink.TypeDescription.SET);
+                    }
+                    if (retbrick == null)
+                        reply.Text = BrickBotRes.SearchError;
+                    else
+                    {
+                        reply = BuildMessage(context, retbrick);
+                    }
+                    await context.PostAsync(reply);
+                    BricksetServiceAPI brickset = new BricksetServiceAPI();
+                    retbrick = brickset.getSets(number);
+                    if (retbrick == null)
+                    {
+                        number += "-1";
+                        retbrick = brickset.getSets(number);
+                    }
+                    if (retbrick == null)
+                        reply.Text = BrickBotRes.SearchError;
+                    else
+                    {
+                        reply = BuildMessage(context, retbrick);
+                    }
+                    await context.PostAsync(reply);
+                    RebrickableService rebrickable = new RebrickableService();
+                    retbrick = rebrickable.GetSetInfo(number);
+                    if (retbrick == null)
+                    {
+                        number += "-1";
+                        retbrick = rebrickable.GetSetInfo(number);
+                    }
+                    if (retbrick == null)
+                        reply.Text = BrickBotRes.SearchError;
+                    else
+                    {
+                        reply = BuildMessage(context, retbrick);
+                    }
+                    await context.PostAsync(reply);
+                    PeeronService peeron = new PeeronService();
+                    retbrick = peeron.GetSetDetails(number);
+                    if (retbrick == null)
+                        reply.Text = BrickBotRes.SearchError;
+                    else
+                    {
+                        reply = BuildMessage(context, retbrick);
+                    }
+                    await context.PostAsync(reply);
+                }
+                else
+                {
+                    reply.Text = BrickBotRes.BrickBotError;
+                    reply.TextFormat = "markdown";
+                    await context.PostAsync(reply);
+                }
+
+                //reply.Text = strresp;
+
+            }
+            catch (Exception ex)
+            {
+                await context.PostAsync(BrickBotRes.BrickBotError + $"{ex.Message}");
             }
 
-            reply.Text = strresp;
-            reply.TextFormat = "markdown";
-            await context.PostAsync(reply);
-            //context.Wait(MessageReceivedAsync);
-            //await this.WelcomeMessageAsync(context);
+            //context.Wait(this.MessageReceivedAsync);
             await this.WelcomeMessageAsync(context);
         }
         #endregion
