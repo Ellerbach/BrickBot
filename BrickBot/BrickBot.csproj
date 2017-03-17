@@ -176,6 +176,10 @@
     <Compile Include="Models\Bricklink\PriceItem.cs" />
     <Compile Include="Models\ItemType.cs" />
     <Compile Include="Models\PriceDetails.cs" />
+    <Compile Include="Models\Rebrickable\BrickableCategories.cs" />
+    <Compile Include="Models\Rebrickable\BrickableMOC.cs" />
+    <Compile Include="Models\Rebrickable\BrickablePart.cs" />
+    <Compile Include="Models\Rebrickable\BrickableSet.cs" />
     <Compile Include="Models\ServiceProvider.cs" />
     <Compile Include="Models\BrickItem.cs" />
     <Compile Include="Models\SetInstructions.cs" />
@@ -191,6 +195,7 @@
     <Compile Include="Services\Bricklink\WebParameterCollection.cs" />
     <Compile Include="Services\BricksetService\BricksetService.cs" />
     <Compile Include="Services\Peeron\PeeronService.cs" />
+    <Compile Include="Services\Rebrickable\RebrickableService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -212,7 +217,6 @@
   <ItemGroup>
     <Folder Include="Models\Brickset\" />
     <Folder Include="Models\Peeron\" />
-    <Folder Include="Models\Rebrickable\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\BrickBotRes.resx">

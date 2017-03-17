@@ -22,6 +22,7 @@ namespace BrickBot.Services.Peeron
             // Read the content.
             var pagecontent = reader.ReadToEnd();
             BrickItem retitem = new BrickItem();
+            retitem.BrickURL = url;
             //search for MSRP
             const string magicstring = "MSRP:&nbsp;<b>$";
             var idx = pagecontent.IndexOf(magicstring);

@@ -3,6 +3,7 @@ using BrickBot.Properties;
 using BrickBot.Services.Bricklink;
 using BrickBot.Services.BricksetService;
 using BrickBot.Services.Peeron;
+using BrickBot.Services.Rebrickable;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
 using System;
@@ -187,101 +188,125 @@ namespace BrickBot.Dialogs
         private IMessageActivity BuildMessage(IDialogContext context, BrickItem retbrick)
         {
             var reply = context.MakeMessage();
-            if (retbrick.BrickService == ServiceProvider.Bricklink)
+            if ((retbrick.BrickService == ServiceProvider.Bricklink) || (retbrick.BrickService == ServiceProvider.Brickset) ||
+                (retbrick.BrickService == ServiceProvider.Rebrickable) || (retbrick.BrickService == ServiceProvider.Peeron))
             {
-                if (retbrick.ThumbnailUrl != "")
-                {
-                    reply.Attachments = new List<Attachment>();
-                    List<CardImage> cardImages = new List<CardImage>();
-                    cardImages.Add(new CardImage(url: retbrick.ThumbnailUrl));
-                    HeroCard plCard = new HeroCard()
-                    {
-                        Title = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n",
-                        Images = cardImages
-                    };
-                    reply.Attachments.Add(plCard.ToAttachment());
-                }
-                else
-                    reply.Text += $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n";
-                reply.Text += $"\r\nTheme {retbrick.Theme} \r\n";
-                if (retbrick.YearReleased != 0)
-                    reply.Text += $"\r\n Year {retbrick.YearReleased} \r\n";
-                if (retbrick.Color != null)
-                    if (retbrick.Color != "")
-                        reply.Text += $"\r\n Color {retbrick.Color} \r\n";
-                string setcurrency;
-                //need to implement a way to check the currncy.
-                context.PrivateConversationData.TryGetValue(BrickBotRes.CurrencyValue, out setcurrency);
-                if (retbrick.New.Average != 0)
-                    reply.Text += $"\r\n New: min {retbrick.New.Min.ToString("0.00")} max {retbrick.New.Max.ToString("0.00")} avg {retbrick.New.Average.ToString("0.00")} {setcurrency} \r\n";
-                if (retbrick.Used.Average != 0)
-                    reply.Text += $"\r\n Used: min {retbrick.Used.Min.ToString("0.00")} max {retbrick.Used.Max.ToString("0.00")} avg {retbrick.Used.Average.ToString("0.00")} {setcurrency} \r\n";
-            }
-            else if ((retbrick.BrickService == ServiceProvider.Brickset) || (retbrick.BrickService == ServiceProvider.Rebrickable) || (retbrick.BrickService == ServiceProvider.Peeron))
-            {
+
+                reply.Attachments = new List<Attachment>();
+                List<CardAction> cardButtons = new List<CardAction>();
                 if (retbrick.Instructions != null)
-                {
-                    //reply.Text = $"Here are available instructions for {retbrick.Name} - {retbrick.Number}: \r\n";
-                    reply.Attachments = new List<Attachment>();
-                    List<CardAction> cardAction = new List<CardAction>();
                     foreach (var inst in retbrick.Instructions)
                     {
-                        cardAction.Add(new CardAction() { Title = inst.Name, Value = inst.URL, Type = "openUrl" });
-                        //reply.Text += $"{inst.Name}: {inst.URL} \r\n";
+                        cardButtons.Add(new CardAction() { Title = inst.Name, Value = inst.URL, Type = "openUrl" });
                     }
-                    HeroCard plCard = new HeroCard()
-                    {
-                        Title = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n",
-                        Buttons = cardAction
-
-                    };
-                    if (retbrick.ThumbnailUrl != null)
-                        if (retbrick.ThumbnailUrl != "")
-                        {
-                            List<CardImage> cardImages = new List<CardImage>();
-                            cardImages.Add(new CardImage(url: retbrick.ThumbnailUrl));
-
-                            plCard.Images = cardImages;
-                        }
-                    reply.Attachments.Add(plCard.ToAttachment());
-                    if (retbrick.YearReleased != 0)
-                        reply.Text += $"Year {retbrick.YearReleased} \r\n";
-
-                    reply.Text += $"Theme {retbrick.Theme} \r\n";
-                    if (retbrick.Color != null)
-                        if (retbrick.Color != "")
-                            reply.Text += $"Color {retbrick.Color} \r\n";
-                    if (retbrick.New?.Average != null)
-                        if (retbrick.New.Average != 0)
-                            reply.Text += $"Price {retbrick.New.Average} {retbrick.New.Currency}\r\n";
-                }
-                else
+                HeroCard plCard = new HeroCard()
                 {
+                    Title = $"# {retbrick.Number} - {retbrick.Name}"
+                };
+                if (retbrick.ThumbnailUrl != null)
                     if (retbrick.ThumbnailUrl != "")
                     {
-                        reply.Attachments = new List<Attachment>();
                         List<CardImage> cardImages = new List<CardImage>();
                         cardImages.Add(new CardImage(url: retbrick.ThumbnailUrl));
-                        HeroCard plCard = new HeroCard()
-                        {
-                            Title = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n",
-                            Images = cardImages
-                        };
-                        reply.Attachments.Add(plCard.ToAttachment());
+                        plCard.Images = cardImages;
                     }
-                    reply.Text = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n";
-                    if (retbrick.YearReleased != 0)
-                        reply.Text += $"Year {retbrick.YearReleased} \r\n";
+                if (retbrick.BrickURL != null)
+                    if (retbrick.BrickURL != "")
+                    {
+                        cardButtons.Add(new CardAction() { Title = $"{retbrick.BrickService.ToString()} page", Value = retbrick.BrickURL, Type = "openUrl" });
 
-                    reply.Text += $"Theme {retbrick.Theme} \r\n";
-                    if (retbrick.Color != null)
-                        if (retbrick.Color != "")
-                            reply.Text += $"Color {retbrick.Color} \r\n";
-                    if (retbrick.New?.Average != 0)
-                        reply.Text += $"Color {retbrick.Color} \r\n";
+                    }
+                plCard.Buttons = cardButtons;
+                plCard.Subtitle = $"Theme: {retbrick.Theme}";
+                if (retbrick.YearReleased != 0)
+                    plCard.Subtitle += $" - Year: {retbrick.YearReleased}";
+                else
+                    plCard.Subtitle += " - Year unknown";
+                if (retbrick.Color != null)
+                    if (retbrick.Color != "")
+                        plCard.Subtitle += $" - Color: {retbrick.Color}";
+                //string setcurrency;
+                //need to implement a way to check the currncy.
+                //context.PrivateConversationData.TryGetValue(BrickBotRes.CurrencyValue, out setcurrency);
+                if (retbrick.BrickService == ServiceProvider.Bricklink)
+                {
+                    if (retbrick.New.Average != 0)
+                        plCard.Text += $"New min {retbrick.New.Min.ToString("0.00")}; max {retbrick.New.Max.ToString("0.00")}; avg {retbrick.New.Average.ToString("0.00")} {retbrick.New.Currency}. ";
+                    if (retbrick.Used.Average != 0)
+                        plCard.Text += $"Used min {retbrick.Used.Min.ToString("0.00")}; max {retbrick.Used.Max.ToString("0.00")}; avg {retbrick.Used.Average.ToString("0.00")} {retbrick.Used.Currency}. ";
                 }
+                else
+                    if (retbrick.New?.Average != null)
+                    if (retbrick.New.Average != 0)
+                        plCard.Text += $"Price {retbrick.New.Average} {retbrick.New.Currency}";
+
+                reply.Attachments.Add(plCard.ToAttachment());
             }
-            reply.TextFormat = "markdown";
+            //else if ((retbrick.BrickService == ServiceProvider.Brickset) || (retbrick.BrickService == ServiceProvider.Rebrickable) || (retbrick.BrickService == ServiceProvider.Peeron))
+            //{
+            //    if (retbrick.Instructions != null)
+            //    {
+            //        reply.Attachments = new List<Attachment>();
+            //        List<CardAction> cardAction = new List<CardAction>();
+            //        foreach (var inst in retbrick.Instructions)
+            //        {
+            //            cardAction.Add(new CardAction() { Title = inst.Name, Value = inst.URL, Type = "openUrl" });
+            //        }
+            //        if (retbrick.BrickURL != "")
+            //            cardAction.Add(new CardAction() { Title = $"{retbrick.BrickService.ToString()} page", Value = retbrick.BrickURL, Type = "openUrl" });
+            //        HeroCard plCard = new HeroCard()
+            //        {
+            //            Title = $"# {retbrick.Number} - {retbrick.Name}",
+            //            Buttons = cardAction
+            //        };
+            //        if (retbrick.ThumbnailUrl != null)
+            //            if (retbrick.ThumbnailUrl != "")
+            //            {
+            //                List<CardImage> cardImages = new List<CardImage>();
+            //                cardImages.Add(new CardImage(url: retbrick.ThumbnailUrl));
+
+            //                plCard.Images = cardImages;
+            //            }
+            //        if (retbrick.YearReleased != 0)
+            //            reply.Text += $"Year {retbrick.YearReleased} \r\n";
+
+            //        reply.Text += $"Theme {retbrick.Theme} \r\n";
+            //        if (retbrick.Color != null)
+            //            if (retbrick.Color != "")
+            //                reply.Text += $"Color {retbrick.Color} \r\n";
+            //        if (retbrick.New?.Average != null)
+            //            if (retbrick.New.Average != 0)
+            //                reply.Text += $"Price {retbrick.New.Average} {retbrick.New.Currency}\r\n";
+
+            //        reply.Attachments.Add(plCard.ToAttachment());
+            //    }
+            //    else
+            //    {
+            //        if (retbrick.ThumbnailUrl != "")
+            //        {
+            //            reply.Attachments = new List<Attachment>();
+            //            List<CardImage> cardImages = new List<CardImage>();
+            //            cardImages.Add(new CardImage(url: retbrick.ThumbnailUrl));
+            //            HeroCard plCard = new HeroCard()
+            //            {
+            //                Title = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n",
+            //                Images = cardImages
+            //            };
+            //            reply.Attachments.Add(plCard.ToAttachment());
+            //        }
+            //        reply.Text = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n";
+            //        if (retbrick.YearReleased != 0)
+            //            reply.Text += $"Year {retbrick.YearReleased} \r\n";
+
+            //        reply.Text += $"Theme {retbrick.Theme} \r\n";
+            //        if (retbrick.Color != null)
+            //            if (retbrick.Color != "")
+            //                reply.Text += $"Color {retbrick.Color} \r\n";
+            //        if (retbrick.New?.Average != 0)
+            //            reply.Text += $"Color {retbrick.Color} \r\n";
+            //    }
+            //}
+            //reply.TextFormat = "markdown";
             return reply;
         }
 
@@ -315,36 +340,25 @@ namespace BrickBot.Dialogs
         private async Task OnOptionSelectedBricklink(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
             var message = await result;
-            //var reply = context.MakeMessage();
-            //string strresp = "You have selected ";
             string retstr = "";
 
             if (message.Text == BrickBotRes.BricklinkSet)
             {
                 retstr = BrickBotRes.SetNumber;
-                //strresp += "Set ";
             }
             else if (message.Text == BrickBotRes.BricklinkPart)
             {
                 retstr = BrickBotRes.PartNumber;
-                //strresp += "Part ";
             }
             else if (message.Text == BrickBotRes.BricklinkMinifig)
             {
                 retstr = BrickBotRes.MinifigNumber;
-                //strresp += "Minifig ";
             }
             else if (message.Text == BrickBotRes.BricklinkBook)
             {
                 retstr = BrickBotRes.BookNumber;
-                //strresp += "Book ";
             }
-
             context.PrivateConversationData.SetValue(BrickBotRes.WhatSearFor, message.Text);
-            //reply.Text = strresp;
-            //reply.TextFormat = "markdown";
-            //await context.PostAsync(reply);
-            //context.Wait(MessageReceivedAsync);
             if (retstr != "")
                 PromptDialog.Text(context, this.ResumeAfterBricklink, retstr);
             else
@@ -448,7 +462,6 @@ namespace BrickBot.Dialogs
             HeroCard plCard = new HeroCard()
             {
                 Title = "Select what you want to search",
-                //Subtitle = "Pig Latin Wikipedia Page",
                 Images = cardImages,
                 Buttons = cardButtons
             };
@@ -571,28 +584,100 @@ namespace BrickBot.Dialogs
         private async Task OnOptionSelectedRebrickable(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
             var message = await result;
-            var reply = context.MakeMessage();
-            string strresp = "You have selected ";
+            string retstr = "";
 
             if (message.Text == BrickBotRes.RebrickableSet)
             {
-                strresp += "Set ";
+                retstr = BrickBotRes.SetNumber;
             }
             else if (message.Text == BrickBotRes.RebrickablePart)
             {
-                strresp += "Part ";
+                retstr = BrickBotRes.PartNumber;
             }
             else if (message.Text == BrickBotRes.RebrickableMoc)
             {
-                strresp += "MOC ";
+                retstr = BrickBotRes.MocNumber;
+            }
+            context.PrivateConversationData.SetValue(BrickBotRes.WhatSearFor, message.Text);
+            if (retstr != "")
+                PromptDialog.Text(context, this.ResumeAfterRebrickable, retstr);
+            else
+                await this.WelcomeMessageAsync(context);
+        }
+
+        private async Task ResumeAfterRebrickable(IDialogContext context, IAwaitable<string> result)
+        {
+            try
+            {
+                var number = await result;
+                var reply = context.MakeMessage();
+                string strresp = "";
+                //need to check the currency in real!
+                await context.PostAsync(BrickBotRes.ThanksGiveMeASec);
+                //find what was requested
+                string whatyouwant;
+                //need to implement a way to check the currncy.
+                context.PrivateConversationData.TryGetValue(BrickBotRes.WhatSearFor, out whatyouwant);
+                RebrickableService bs = new RebrickableService();
+
+                if (whatyouwant == BrickBotRes.RebrickableSet)
+                {
+                    var retbrick = bs.GetSetInfo(number);
+                    if (retbrick == null)
+                    {
+                        number += "-1";
+                        retbrick = bs.GetSetInfo(number);
+                    }
+                    if (retbrick == null)
+                        reply.Text = BrickBotRes.SearchError;
+                    else
+                    {
+                        reply = BuildMessage(context, retbrick);
+                    }
+                }
+                else if (whatyouwant == BrickBotRes.RebrickableMoc)
+                {
+                    var retbrick = bs.GetMOCInfo(number);
+                    if (retbrick == null)
+                    {
+                        number = "MOC-" + number;
+                        retbrick = bs.GetMOCInfo(number);
+                    }
+                    if (retbrick == null)
+                        reply.Text = BrickBotRes.SearchError;
+                    else
+                    {
+                        reply = BuildMessage(context, retbrick);
+                    }
+                }
+                else if (whatyouwant == BrickBotRes.RebrickablePart)
+                {
+                    var retbrick = bs.GetPartInfo(number);
+                    if (retbrick == null)
+                        reply.Text = BrickBotRes.SearchError;
+                    else
+                    {
+                        reply = BuildMessage(context, retbrick);
+                    }
+                }
+                else
+                {
+                    reply.Text = BrickBotRes.BrickBotError;
+                }
+
+                //reply.Text = strresp;
+                reply.TextFormat = "markdown";
+                await context.PostAsync(reply);
+            }
+            catch (Exception ex)
+            {
+                await context.PostAsync(BrickBotRes.BrickBotError + $"{ex.Message}");
             }
 
-            reply.Text = strresp;
-            reply.TextFormat = "markdown";
-            await context.PostAsync(reply);
-            //context.Wait(MessageReceivedAsync);
+            //context.Wait(this.MessageReceivedAsync);
             await this.WelcomeMessageAsync(context);
         }
+
         #endregion
 
         #region Peeron

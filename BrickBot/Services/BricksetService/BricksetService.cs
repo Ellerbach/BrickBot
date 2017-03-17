@@ -43,6 +43,7 @@ namespace BrickBot.Services.BricksetService
             retitem.ItemType = ItemType.Set;
             retitem.Theme = ret[0].theme;
             retitem.ThumbnailUrl = ret[0].thumbnailURL;
+            retitem.BrickURL = ret[0].bricksetURL;
             int years;
             int.TryParse(ret[0].year, out years);
             retitem.YearReleased = years;
@@ -76,6 +77,7 @@ namespace BrickBot.Services.BricksetService
             int years;
             int.TryParse(ret[0].year, out years);
             retitem.YearReleased = years;
+            retitem.BrickURL = ret[0].bricksetURL;
             return retitem;
 
         }

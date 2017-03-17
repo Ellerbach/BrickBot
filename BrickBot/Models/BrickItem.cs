@@ -11,6 +11,7 @@ namespace BrickBot.Models
         public string Name { get; set; }
         public string Theme { get; set; }
         public string ThumbnailUrl { get; set; }
+        public string BrickURL { get; set; }
         public int YearReleased { get; set; }
         public SetInstruction[] Instructions{ get; set; }
         public PriceDetails New { get; set; }

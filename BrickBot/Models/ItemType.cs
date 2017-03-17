@@ -10,6 +10,6 @@ namespace BrickBot.Models
     // will return BOOK
     public enum ItemType
     {
-        Minifig = 0, Part, Set, Book, Gear, Catalog, Instruction, Other
+        Minifig = 0, Part, Set, Book, Gear, Catalog, Instruction, MOC, Other
     }
 }

@@ -40,6 +40,33 @@ namespace BrickBot.Services.Bricklink
                         retset.Number = retobjdeser.data.no;
                         retset.Name = retobjdeser.data.name;
                         retset.ThumbnailUrl = retobjdeser.data.thumbnail_url;
+                        switch (typedesc)
+                        {
+                            case TypeDescription.MINIFIG:
+                                retset.BrickURL = "https://www.bricklink.com/v2/catalog/catalogitem.page?M=" + retset.Number;
+                                break;
+                            case TypeDescription.PART:
+                                retset.BrickURL = "https://www.bricklink.com/v2/catalog/catalogitem.page?P=" + retset.Number;
+                                break;
+                            case TypeDescription.SET:
+                                retset.BrickURL = "https://www.bricklink.com/v2/catalog/catalogitem.page?S=" + retset.Number;
+                                break;
+                            case TypeDescription.BOOK:
+                                retset.BrickURL = "https://www.bricklink.com/v2/catalog/catalogitem.page?B=" + retset.Number;
+                                break;
+                            case TypeDescription.GEAR:
+                                retset.BrickURL = "https://www.bricklink.com/v2/catalog/catalogitem.page?G=" + retset.Number;
+                                break;
+                            case TypeDescription.CATALOG:
+                                retset.BrickURL = "https://www.bricklink.com/v2/catalog/catalogitem.page?C=" + retset.Number;
+                                break;
+                            case TypeDescription.INSTRUCTION:                           
+                            case TypeDescription.UNSORTED_LOT:                                
+                            case TypeDescription.ORIGINAL_BOX:                               
+                            default:
+                                retset.BrickURL = "https://www.bricklink.com/v2/search.page?q=" + retset.Number;
+                                break;
+                        }                        
                         //clean URL, sometimes it comes without the http
                         if (retset.ThumbnailUrl.Length>0)
                             if(retset.ThumbnailUrl.IndexOf("http",StringComparison.CurrentCultureIgnoreCase)<0)
