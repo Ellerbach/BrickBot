@@ -148,11 +148,16 @@
     </None>
     <Content Include="default.htm" />
     <Content Include="Global.asax" />
+    <Content Include="Images\brickbot-square.png" />
+    <Content Include="Images\bricklink-square.png" />
     <Content Include="Images\bricklink.png" />
     <Content Include="Images\bricklogo-small.png" />
     <Content Include="Images\bricklogo.png" />
+    <Content Include="Images\brickset-square.png" />
     <Content Include="Images\brickset.png" />
+    <Content Include="Images\peeron-square.png" />
     <Content Include="Images\peeron.png" />
+    <Content Include="Images\rebrickable-square.png" />
     <Content Include="Images\rebrickable.png" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>

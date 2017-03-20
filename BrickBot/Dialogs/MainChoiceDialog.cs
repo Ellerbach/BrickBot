@@ -316,7 +316,7 @@ namespace BrickBot.Dialogs
             var reply = context.MakeMessage();
             reply.Attachments = new List<Attachment>();
             List<CardImage> cardImages = new List<CardImage>();
-            cardImages.Add(new CardImage(url: $"{URL}/Images/bricklink.png"));
+            cardImages.Add(new CardImage(url: $"{URL}/Images/bricklink-square.png"));
             List<CardAction> cardButtons = new List<CardAction>();
             cardButtons.Add(new CardAction() { Title = BrickBotRes.BricklinkSet, Value = BrickBotRes.BricklinkSet, Type = "postBack" });
             cardButtons.Add(new CardAction() { Title = BrickBotRes.BricklinkPart, Value = BrickBotRes.BricklinkPart, Type = "postBack" });
@@ -455,7 +455,7 @@ namespace BrickBot.Dialogs
 
             reply.Attachments = new List<Attachment>();
             List<CardImage> cardImages = new List<CardImage>();
-            cardImages.Add(new CardImage(url: $"{URL}/Images/brickset.png"));
+            cardImages.Add(new CardImage(url: $"{URL}/Images/brickset-square.png"));
             List<CardAction> cardButtons = new List<CardAction>();
             cardButtons.Add(new CardAction() { Title = BrickBotRes.BricksetSet, Value = BrickBotRes.BricksetSet, Type = "postBack" });
             cardButtons.Add(new CardAction() { Title = BrickBotRes.BricksetInstructions, Value = BrickBotRes.BricksetInstructions, Type = "postBack" });
@@ -563,7 +563,7 @@ namespace BrickBot.Dialogs
             var reply = context.MakeMessage();
             reply.Attachments = new List<Attachment>();
             List<CardImage> cardImages = new List<CardImage>();
-            cardImages.Add(new CardImage(url: $"{URL}/Images/rebrickable.png"));
+            cardImages.Add(new CardImage(url: $"{URL}/Images/rebrickable-square.png"));
             List<CardAction> cardButtons = new List<CardAction>();
             cardButtons.Add(new CardAction() { Title = BrickBotRes.RebrickableSet, Value = BrickBotRes.RebrickableSet, Type = "postBack" });
             cardButtons.Add(new CardAction() { Title = BrickBotRes.RebrickablePart, Value = BrickBotRes.RebrickablePart, Type = "postBack" });
@@ -686,7 +686,7 @@ namespace BrickBot.Dialogs
             var reply = context.MakeMessage();
             reply.Attachments = new List<Attachment>();
             List<CardImage> cardImages = new List<CardImage>();
-            cardImages.Add(new CardImage(url: $"{URL}/Images/peeron.png"));
+            cardImages.Add(new CardImage(url: $"{URL}/Images/peeron-square.png"));
             List<CardAction> cardButtons = new List<CardAction>();
             cardButtons.Add(new CardAction() { Title = BrickBotRes.PeeronSet, Value = BrickBotRes.PeeronSet, Type = "postBack" });
             cardButtons.Add(new CardAction() { Title = BrickBotRes.PeeronInstructions, Value = BrickBotRes.PeeronInstructions, Type = "postBack" });
