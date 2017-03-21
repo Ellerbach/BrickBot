@@ -159,6 +159,7 @@
     <Content Include="Images\peeron.png" />
     <Content Include="Images\rebrickable-square.png" />
     <Content Include="Images\rebrickable.png" />
+    <Content Include="terms.html" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
