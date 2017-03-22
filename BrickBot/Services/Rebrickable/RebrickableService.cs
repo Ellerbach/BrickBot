@@ -12,7 +12,8 @@ using System.Web;
 
 namespace BrickBot.Services.Rebrickable
 {
-    public class RebrickableService
+    [Serializable]
+    public class RebrickableService : IBrickService
     {
         public static string Apikey { get; set; }
 
@@ -35,20 +36,26 @@ namespace BrickBot.Services.Rebrickable
         public BrickItem GetSetInfo(string number)
         {
             BrickItem retitem = new BrickItem();
-
-            string url = $"https://rebrickable.com/api/v3/lego/sets/{number}/";
-            var strret = ExecuteRequest(url);
-            var retobjdeser = Newtonsoft.Json.JsonConvert.DeserializeObject<BrickableSet>(strret);
-            if (retobjdeser == null)
-                return null;
-            retitem.Name = retobjdeser.name;
-            retitem.Number = retobjdeser.set_num;
-            retitem.ThumbnailUrl = retobjdeser.set_img_url;
-            retitem.ItemType = ItemType.Set;
-            retitem.YearReleased = retobjdeser.year;
-            retitem.Theme = Categories.Where(x =>x.id ==retobjdeser.theme_id).First().name;
-            retitem.BrickURL = retobjdeser.set_url;
-            retitem.BrickService = ServiceProvider.Rebrickable;
+            try
+            {
+                string url = $"https://rebrickable.com/api/v3/lego/sets/{number}/";
+                var strret = ExecuteRequest(url);
+                var retobjdeser = Newtonsoft.Json.JsonConvert.DeserializeObject<BrickableSet>(strret);
+                if (retobjdeser == null)
+                    return null;
+                retitem.Name = retobjdeser.name;
+                retitem.Number = retobjdeser.set_num;
+                retitem.ThumbnailUrl = retobjdeser.set_img_url;
+                retitem.ItemType = ItemType.Set;
+                retitem.YearReleased = retobjdeser.year;
+                retitem.Theme = Categories.Where(x => x.id == retobjdeser.theme_id).First().name;
+                retitem.BrickURL = retobjdeser.set_url;
+                retitem.BrickService = ServiceProvider.Rebrickable;
+            }
+            catch (Exception)
+            {
+            }
+            
             return retitem;
 
         }
@@ -56,49 +63,71 @@ namespace BrickBot.Services.Rebrickable
         public BrickItem GetMOCInfo(string number)
         {
             BrickItem retitem = new BrickItem();
-
-            string url = $"https://rebrickable.com/api/v3/lego/mocs/{number}/";
-            var strret = ExecuteRequest(url);
-            var retobjdeser = Newtonsoft.Json.JsonConvert.DeserializeObject<BrickableMOC>(strret);
-            if (retobjdeser == null)
-                return null;
-            retitem.Name = retobjdeser.name;
-            retitem.Number = retobjdeser.set_num;
-            retitem.ThumbnailUrl = retobjdeser.moc_img_url;
-            retitem.ItemType = ItemType.MOC;
-            retitem.YearReleased = retobjdeser.year;
-            retitem.Theme = Categories.Where(x => x.id == retobjdeser.theme_id).First().name;
-            retitem.BrickURL = retobjdeser.moc_url;
-            retitem.BrickService = ServiceProvider.Rebrickable;
+            try
+            {
+                string url = $"https://rebrickable.com/api/v3/lego/mocs/{number}/";
+                var strret = ExecuteRequest(url);
+                var retobjdeser = Newtonsoft.Json.JsonConvert.DeserializeObject<BrickableMOC>(strret);
+                if (retobjdeser == null)
+                    return null;
+                retitem.Name = retobjdeser.name;
+                retitem.Number = retobjdeser.set_num;
+                retitem.ThumbnailUrl = retobjdeser.moc_img_url;
+                retitem.ItemType = ItemType.MOC;
+                retitem.YearReleased = retobjdeser.year;
+                retitem.Theme = Categories.Where(x => x.id == retobjdeser.theme_id).First().name;
+                retitem.BrickURL = retobjdeser.moc_url;
+                retitem.BrickService = ServiceProvider.Rebrickable;
+            }
+            catch (Exception)
+            {
+            } 
             return retitem;
         }
 
         public BrickItem GetPartInfo(string number)
         {
             BrickItem retitem = new BrickItem();
+            try
+            {
+                string url = $"https://rebrickable.com/api/v3/lego/parts/{number}/";
+                var strret = ExecuteRequest(url);
+                var retobjdeser = Newtonsoft.Json.JsonConvert.DeserializeObject<BrickablePart>(strret);
+                if (retobjdeser == null)
+                    return null;
+                retitem.Name = retobjdeser.name;
+                retitem.Number = retobjdeser.part_num;
+                retitem.ThumbnailUrl = retobjdeser.part_img_url;
+                retitem.ItemType = ItemType.MOC;
+                retitem.YearReleased = retobjdeser.year_from;
+                retitem.Theme = Categories.Where(x => x.id == retobjdeser.part_cat_id).First().name;
+                retitem.BrickURL = retobjdeser.part_url;
+                retitem.BrickService = ServiceProvider.Rebrickable;
+            }
+            catch (Exception)
+            {
 
-            string url = $"https://rebrickable.com/api/v3/lego/parts/{number}/";
-            var strret = ExecuteRequest(url);
-            var retobjdeser = Newtonsoft.Json.JsonConvert.DeserializeObject<BrickablePart>(strret);
-            if (retobjdeser == null)
-                return null;
-            retitem.Name = retobjdeser.name;
-            retitem.Number = retobjdeser.part_num;
-            retitem.ThumbnailUrl = retobjdeser.part_img_url;
-            retitem.ItemType = ItemType.MOC;
-            retitem.YearReleased = retobjdeser.year_from;
-            retitem.Theme = Categories.Where(x => x.id == retobjdeser.part_cat_id).First().name;
-            retitem.BrickURL = retobjdeser.part_url;
-            retitem.BrickService = ServiceProvider.Rebrickable;
+                
+            }
+            
             return retitem;
         }
 
         public Result[] GetThemes()
         {
-            string url = $"https://rebrickable.com/api/v3/lego/themes/";
-            var strret = ExecuteRequest(url);
-            var retobjdeser = Newtonsoft.Json.JsonConvert.DeserializeObject<BrickableCategories>(strret);
-            return retobjdeser.results;
+            try
+            {
+                string url = $"https://rebrickable.com/api/v3/lego/themes/";
+                var strret = ExecuteRequest(url);
+                var retobjdeser = Newtonsoft.Json.JsonConvert.DeserializeObject<BrickableCategories>(strret);
+                return retobjdeser.results;
+            }
+            catch (Exception)
+            {
+
+                return null;
+            }
+            
         }
 
         static private string ExecuteRequest(string url, WebParameterCollection param = null)
@@ -125,7 +154,95 @@ namespace BrickBot.Services.Rebrickable
 
                 return "";
             }
-            
+
+        }
+
+        public bool CanGetSetInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetPartInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetInstructionsInfo()
+        {
+            return false;
+        }
+
+        public bool CanGetMinifigInfo()
+        {
+            return false;
+        }
+
+        public bool CanGetGearInfo()
+        {
+            return false;
+        }
+
+        public bool CanGetBookInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetCatalogInfo()
+        {
+            return false;
+        }
+
+        public bool CanGetMOCInfo()
+        {
+            return true;
+        }
+
+        public BrickItem GetBrickInfo(string number, ItemType typedesc)
+        {
+            BrickItem ret = null;
+            switch (typedesc)
+            {
+
+                case ItemType.Part:
+                    return GetPartInfo(number);
+                case ItemType.Book:
+                case ItemType.Set:
+                    ret = GetSetInfo(number);
+                    if (ret == null)
+                    {
+                        number += "-1";
+                        ret = GetSetInfo(number);
+                    }
+                    return ret;
+                
+                    return GetSetInfo(number);
+                case ItemType.MOC:
+                    ret = GetMOCInfo(number);
+                    if(ret == null)
+                    {
+                        number = "MOC-" + number;
+                        ret = GetMOCInfo(number);
+                    }
+                    return ret;
+                case ItemType.Other:
+                case ItemType.Instruction:
+                case ItemType.Catalog:
+                case ItemType.Gear:
+                case ItemType.Minifig:
+                default:
+                    return null;
+                    break;
+            };
+        }
+
+        public ServiceProvider GetServiceProvider
+        {
+            get { return ServiceProvider.Rebrickable; }
+        }
+
+        public List<ItemType> GetSupportedInfo
+        {
+            get { return new List<ItemType>() { ItemType.Set, ItemType.Part, ItemType.Book, ItemType.MOC }; }
         }
     }
 }

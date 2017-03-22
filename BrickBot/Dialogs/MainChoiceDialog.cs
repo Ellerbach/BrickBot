@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Resources;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -22,6 +23,8 @@ namespace BrickBot.Dialogs
         private string URL = ConfigurationManager.AppSettings["serviceurl"];
         //to store user currency preferences
         private ResumptionCookie resumptionCookie;
+        private List<IBrickService> brickservices = new List<IBrickService>() { new BricklinkService(), new BricksetServiceAPI(), new RebrickableService(), new PeeronService() };
+
         public async Task StartAsync(IDialogContext context)
         {
             context.Wait(this.MessageReceivedAsync);
@@ -65,31 +68,38 @@ namespace BrickBot.Dialogs
                 //    //myWivaldy.Connection = currency;
                 //}
 
-                if (message.Text == BrickBotRes.WelcomeBricklink)
+                if ((message.Text == BrickBotRes.WelcomeBricklink) || (message.Text == BrickBotRes.WelcomeBrickset) ||
+                    (message.Text == BrickBotRes.WelcomePeeron) || (message.Text == BrickBotRes.WelcomeRebrickable) ||
+                    (message.Text == BrickBotRes.WelcomeAll))
                 {
-                    await this.Bricklink(context);
+                    await this.BrickService(context, result);
                     return;
                 }
-                else if (message.Text == BrickBotRes.WelcomeBrickset)
-                {
-                    await this.Brickset(context);
-                    return;
-                }
-                else if (message.Text == BrickBotRes.WelcomeRebrickable)
-                {
-                    await this.Rebrickable(context);
-                    return;
-                }
-                else if (message.Text == BrickBotRes.WelcomeAll)
-                {
-                    await this.BrickAll(context);
-                    return;
-                }
-                else if (message.Text == BrickBotRes.WelcomePeeron)
-                {
-                    await this.Peeron(context);
-                    return;
-                }
+                //if (message.Text == BrickBotRes.WelcomeBricklink)
+                //{
+                //    await this.Bricklink(context);
+                //    return;
+                //}
+                //else if (message.Text == BrickBotRes.WelcomeBrickset)
+                //{
+                //    await this.Brickset(context);
+                //    return;
+                //}
+                //else if (message.Text == BrickBotRes.WelcomeRebrickable)
+                //{
+                //    await this.Rebrickable(context);
+                //    return;
+                //}
+                //else if (message.Text == BrickBotRes.WelcomeAll)
+                //{
+                //    await this.BrickAll(context);
+                //    return;
+                //}
+                //else if (message.Text == BrickBotRes.WelcomePeeron)
+                //{
+                //    await this.Peeron(context);
+                //    return;
+                //}
                 await this.WelcomeMessageAsync(context);
             }
             catch (Exception ex)
@@ -242,71 +252,6 @@ namespace BrickBot.Dialogs
 
                 reply.Attachments.Add(plCard.ToAttachment());
             }
-            //else if ((retbrick.BrickService == ServiceProvider.Brickset) || (retbrick.BrickService == ServiceProvider.Rebrickable) || (retbrick.BrickService == ServiceProvider.Peeron))
-            //{
-            //    if (retbrick.Instructions != null)
-            //    {
-            //        reply.Attachments = new List<Attachment>();
-            //        List<CardAction> cardAction = new List<CardAction>();
-            //        foreach (var inst in retbrick.Instructions)
-            //        {
-            //            cardAction.Add(new CardAction() { Title = inst.Name, Value = inst.URL, Type = "openUrl" });
-            //        }
-            //        if (retbrick.BrickURL != "")
-            //            cardAction.Add(new CardAction() { Title = $"{retbrick.BrickService.ToString()} page", Value = retbrick.BrickURL, Type = "openUrl" });
-            //        HeroCard plCard = new HeroCard()
-            //        {
-            //            Title = $"# {retbrick.Number} - {retbrick.Name}",
-            //            Buttons = cardAction
-            //        };
-            //        if (retbrick.ThumbnailUrl != null)
-            //            if (retbrick.ThumbnailUrl != "")
-            //            {
-            //                List<CardImage> cardImages = new List<CardImage>();
-            //                cardImages.Add(new CardImage(url: retbrick.ThumbnailUrl));
-
-            //                plCard.Images = cardImages;
-            //            }
-            //        if (retbrick.YearReleased != 0)
-            //            reply.Text += $"Year {retbrick.YearReleased} \r\n";
-
-            //        reply.Text += $"Theme {retbrick.Theme} \r\n";
-            //        if (retbrick.Color != null)
-            //            if (retbrick.Color != "")
-            //                reply.Text += $"Color {retbrick.Color} \r\n";
-            //        if (retbrick.New?.Average != null)
-            //            if (retbrick.New.Average != 0)
-            //                reply.Text += $"Price {retbrick.New.Average} {retbrick.New.Currency}\r\n";
-
-            //        reply.Attachments.Add(plCard.ToAttachment());
-            //    }
-            //    else
-            //    {
-            //        if (retbrick.ThumbnailUrl != "")
-            //        {
-            //            reply.Attachments = new List<Attachment>();
-            //            List<CardImage> cardImages = new List<CardImage>();
-            //            cardImages.Add(new CardImage(url: retbrick.ThumbnailUrl));
-            //            HeroCard plCard = new HeroCard()
-            //            {
-            //                Title = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n",
-            //                Images = cardImages
-            //            };
-            //            reply.Attachments.Add(plCard.ToAttachment());
-            //        }
-            //        reply.Text = $"\r\n# {retbrick.Number} - {retbrick.Name} \r\n";
-            //        if (retbrick.YearReleased != 0)
-            //            reply.Text += $"Year {retbrick.YearReleased} \r\n";
-
-            //        reply.Text += $"Theme {retbrick.Theme} \r\n";
-            //        if (retbrick.Color != null)
-            //            if (retbrick.Color != "")
-            //                reply.Text += $"Color {retbrick.Color} \r\n";
-            //        if (retbrick.New?.Average != 0)
-            //            reply.Text += $"Color {retbrick.Color} \r\n";
-            //    }
-            //}
-            //reply.TextFormat = "markdown";
             return reply;
         }
 
@@ -483,7 +428,7 @@ namespace BrickBot.Dialogs
             }
             else if (message.Text == BrickBotRes.BricksetInstructions)
             {
-                retstr = BrickBotRes.InstructionsNumber;
+                retstr = BrickBotRes.InstructionNumber;
             }
             context.PrivateConversationData.SetValue(BrickBotRes.WhatSearFor, message.Text);
             if (retstr != "")
@@ -713,7 +658,7 @@ namespace BrickBot.Dialogs
             }
             else if (message.Text == BrickBotRes.PeeronInstructions)
             {
-                retstr = BrickBotRes.InstructionsNumber;
+                retstr = BrickBotRes.InstructionNumber;
             }
             context.PrivateConversationData.SetValue(BrickBotRes.WhatSearFor, message.Text);
             if (retstr != "")
@@ -800,7 +745,7 @@ namespace BrickBot.Dialogs
             }
             else if (message.Text == BrickBotRes.AllInstructions)
             {
-                retstr = BrickBotRes.InstructionsNumber;
+                retstr = BrickBotRes.InstructionNumber;
             }
             context.PrivateConversationData.SetValue(BrickBotRes.WhatSearFor, message.Text);
             if (retstr != "")
@@ -896,5 +841,136 @@ namespace BrickBot.Dialogs
             await this.WelcomeMessageAsync(context);
         }
         #endregion
+
+        #region IBrickService
+        private async Task BrickService(IDialogContext context, IAwaitable<IMessageActivity> result)
+        {
+            // check which service has been called
+            var message = await result;
+            var bs = brickservices.Where(x => x.GetServiceProvider.ToString().ToLowerInvariant() == message.Text.ToLowerInvariant());
+            var reply = context.MakeMessage();
+            if (!bs.Any())
+            {
+                reply.Text = BrickBotRes.BrickBotError;
+                await context.PostAsync(reply);
+                await this.WelcomeMessageAsync(context);
+            }
+
+            reply.Attachments = new List<Attachment>();
+            List<CardImage> cardImages = new List<CardImage>();
+            cardImages.Add(new CardImage(url: $"{URL}/Images/{bs.First().GetServiceProvider.ToString().ToLower()}-square.png"));
+            List<CardAction> cardButtons = new List<CardAction>();
+            foreach (var serv in bs.First().GetSupportedInfo)
+            {
+                cardButtons.Add(new CardAction() { Title = serv.ToString(), Value = serv.ToString(), Type = "postBack" });
+            }
+            HeroCard plCard = new HeroCard()
+            {
+                Title = BrickBotRes.BrickServiceSearchFor,
+                Images = cardImages,
+                Buttons = cardButtons
+            };
+            Attachment plAttachment = plCard.ToAttachment();
+            reply.Attachments.Add(plAttachment);
+            context.PrivateConversationData.SetValue(BrickBotRes.ServiceUsed, message.Text);
+
+            await context.PostAsync(reply);
+
+            context.Wait(this.OnOptionSelectedBrickService);
+        }
+
+        private async Task OnOptionSelectedBrickService(IDialogContext context, IAwaitable<IMessageActivity> result)
+        {
+            var message = await result;
+            string retstr = "";
+            string serviceused;
+            context.PrivateConversationData.TryGetValue(BrickBotRes.ServiceUsed, out serviceused);
+            var bs = brickservices.Where(x => x.GetServiceProvider.ToString().ToLowerInvariant() == serviceused.ToLowerInvariant());
+            if (!bs.Any())
+            {
+                var reply = context.MakeMessage();
+                reply.Text = BrickBotRes.BrickBotError;
+                await context.PostAsync(reply);
+                await this.WelcomeMessageAsync(context);
+            }
+            // check what is selected and make sure it is part of supported features
+            foreach (var serv in bs.First().GetSupportedInfo)
+            {
+                if(serv.ToString().ToLowerInvariant() == message.Text.ToLowerInvariant())
+                {
+                    retstr = BrickBotRes.ResourceManager.GetString($"{message.Text}Number");
+                }
+            }
+            if (message.Text == BrickBotRes.BricklinkSet)
+            {
+                retstr = BrickBotRes.SetNumber;
+            }
+            else if (message.Text == BrickBotRes.BricklinkPart)
+            {
+                retstr = BrickBotRes.PartNumber;
+            }
+            else if (message.Text == BrickBotRes.BricklinkMinifig)
+            {
+                retstr = BrickBotRes.MinifigNumber;
+            }
+            else if (message.Text == BrickBotRes.BricklinkBook)
+            {
+                retstr = BrickBotRes.BookNumber;
+            }
+
+            context.PrivateConversationData.SetValue(BrickBotRes.WhatSearFor, message.Text);
+            if (retstr != "")
+                PromptDialog.Text(context, this.ResumeAfterBrickService, retstr);
+            else
+                await this.WelcomeMessageAsync(context);
+        }
+
+        private async Task ResumeAfterBrickService(IDialogContext context, IAwaitable<string> result)
+        {
+            try
+            {
+                var number = await result;
+                var reply = context.MakeMessage();
+                string serviceused;
+                context.PrivateConversationData.TryGetValue(BrickBotRes.ServiceUsed, out serviceused);
+                var bs = brickservices.Where(x => x.GetServiceProvider.ToString().ToLowerInvariant() == serviceused.ToLowerInvariant());
+                //find what was requested
+                string whatyouwant;
+                //need to implement a way to check the currncy.
+                context.PrivateConversationData.TryGetValue(BrickBotRes.WhatSearFor, out whatyouwant);
+                ItemType selectitem;
+                var retok = Enum.TryParse<ItemType>(whatyouwant, out selectitem);
+                if (!bs.Any()||(!retok))
+                {
+                    reply.Text = BrickBotRes.BrickBotError;
+                    await context.PostAsync(reply);
+                    await this.WelcomeMessageAsync(context);
+                }
+                //need to check the currency in real!
+                await context.PostAsync(BrickBotRes.ThanksGiveMeASec);
+                //BricklinkService bs = new BricklinkService();
+
+                var retbrick = bs.First().GetBrickInfo(number, selectitem);
+                if (retbrick == null)
+                    reply.Text = BrickBotRes.SearchError;
+                else
+                {
+                    reply = BuildMessage(context, retbrick);
+                }
+
+                reply.TextFormat = "markdown";
+                await context.PostAsync(reply);
+            }
+            catch (Exception ex)
+            {
+                await context.PostAsync(BrickBotRes.BrickBotError + $"{ex.Message}");
+            }
+
+            //context.Wait(this.MessageReceivedAsync);
+            await this.WelcomeMessageAsync(context);
+        }
+
+        #endregion
+
     }
 }

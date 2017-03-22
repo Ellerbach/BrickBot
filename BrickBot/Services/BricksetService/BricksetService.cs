@@ -8,7 +8,8 @@ using System.Web;
 
 namespace BrickBot.Services.BricksetService
 {
-    public class BricksetServiceAPI
+    [Serializable]
+    public class BricksetServiceAPI : IBrickService
     {
 
         private string userHash;
@@ -16,13 +17,13 @@ namespace BrickBot.Services.BricksetService
         //private string username = ConfigurationManager.AppSettings["bsusername"];
         //private string password = ConfigurationManager.AppSettings["bspassword"];
 
-        private BricksetAPIv2SoapClient bsAPI; // = new BricksetAPIv2SoapClient("http://brickset.com/api/v2.asmx");
+        //private BricksetAPIv2SoapClient bsAPI;
 
         public bool isLogged { get; internal set; }
 
         public BricksetServiceAPI()
         {
-            bsAPI = new BricksetAPIv2SoapClient();
+            
             //userHash = bsAPI.login(apikey, username, password);
             //isLogged = true;
             //if (userHash.Contains("ERROR") || userHash.Contains("INVALIDKEY"))
@@ -33,6 +34,7 @@ namespace BrickBot.Services.BricksetService
 
         public BrickItem getSets(string number)
         {
+            BricksetAPIv2SoapClient bsAPI = new BricksetAPIv2SoapClient();
             var ret = bsAPI.getSets(apikey, "", "", "", "", $"{number}", "", "", "", "", "", "", "");
             if (ret == null)
                 return null;
@@ -53,6 +55,7 @@ namespace BrickBot.Services.BricksetService
 
         public BrickItem getInstructions(string number)
         {
+            BricksetAPIv2SoapClient bsAPI = new BricksetAPIv2SoapClient();
             var ret = bsAPI.getSets(apikey, "", "", "", "", $"{number}", "", "", "", "", "", "", "");
             if (ret == null)
                 return null;
@@ -80,6 +83,90 @@ namespace BrickBot.Services.BricksetService
             retitem.BrickURL = ret[0].bricksetURL;
             return retitem;
 
+        }
+
+        public bool CanGetSetInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetPartInfo()
+        {
+            return false;
+        }
+
+        public bool CanGetInstructionsInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetMinifigInfo()
+        {
+            return false;
+        }
+
+        public bool CanGetGearInfo()
+        {
+            return false;
+        }
+
+        public bool CanGetBookInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetCatalogInfo()
+        {
+            return false;
+        }
+
+        public bool CanGetMOCInfo()
+        {
+            return false;
+        }
+
+        public BrickItem GetBrickInfo(string number, ItemType typedesc)
+        {
+            BrickItem ret = null;
+            switch (typedesc)
+            {
+                case ItemType.Set:
+                    ret = getSets(number);
+                    if (ret == null)
+                    {
+                        number += "-1";
+                        ret = getSets(number);
+
+                    }
+                    return ret;
+                case ItemType.Instruction:
+                    ret = getInstructions(number);
+                    if (ret == null)
+                    {
+                        number += "-1";
+                        ret = getInstructions(number);
+                    }
+                    return ret;
+                case ItemType.Part:
+                case ItemType.Book:
+                case ItemType.Gear:
+                case ItemType.Catalog:
+                case ItemType.MOC:
+                case ItemType.Other:
+                case ItemType.Minifig:
+                default:
+                    return null;
+                    break;
+            };
+        }
+
+        public ServiceProvider GetServiceProvider
+        {
+            get { return ServiceProvider.Brickset; }
+        }
+        public List<ItemType> GetSupportedInfo
+        {
+            get { return new List<ItemType>() { ItemType.Set, ItemType.Instruction }; }
         }
     }
 }

@@ -133,6 +133,15 @@ namespace BrickBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select what you want to search.
+        /// </summary>
+        internal static string BrickServiceSearchFor {
+            get {
+                return ResourceManager.GetString("BrickServiceSearchFor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Instructions.
         /// </summary>
         internal static string BricksetInstructions {
@@ -147,6 +156,15 @@ namespace BrickBot.Properties {
         internal static string BricksetSet {
             get {
                 return ResourceManager.GetString("BricksetSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Give me the catalog number.
+        /// </summary>
+        internal static string CatalogNumber {
+            get {
+                return ResourceManager.GetString("CatalogNumber", resourceCulture);
             }
         }
         
@@ -178,11 +196,20 @@ namespace BrickBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Give me the gear number.
+        /// </summary>
+        internal static string GearNumber {
+            get {
+                return ResourceManager.GetString("GearNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Give me the set number for instructions .
         /// </summary>
-        internal static string InstructionsNumber {
+        internal static string InstructionNumber {
             get {
-                return ResourceManager.GetString("InstructionsNumber", resourceCulture);
+                return ResourceManager.GetString("InstructionNumber", resourceCulture);
             }
         }
         
@@ -264,6 +291,15 @@ namespace BrickBot.Properties {
         internal static string SearchError {
             get {
                 return ResourceManager.GetString("SearchError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ServiceUsed.
+        /// </summary>
+        internal static string ServiceUsed {
+            get {
+                return ResourceManager.GetString("ServiceUsed", resourceCulture);
             }
         }
         

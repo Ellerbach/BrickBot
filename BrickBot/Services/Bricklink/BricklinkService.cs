@@ -11,7 +11,8 @@ using System.Web;
 
 namespace BrickBot.Services.Bricklink
 {
-    public class BricklinkService
+    [Serializable]
+    public class BricklinkService : IBrickService
     {
 
         public static ColorItem[] coloritems = GetColor();
@@ -60,16 +61,16 @@ namespace BrickBot.Services.Bricklink
                             case TypeDescription.CATALOG:
                                 retset.BrickURL = "https://www.bricklink.com/v2/catalog/catalogitem.page?C=" + retset.Number;
                                 break;
-                            case TypeDescription.INSTRUCTION:                           
-                            case TypeDescription.UNSORTED_LOT:                                
-                            case TypeDescription.ORIGINAL_BOX:                               
+                            case TypeDescription.INSTRUCTION:
+                            case TypeDescription.UNSORTED_LOT:
+                            case TypeDescription.ORIGINAL_BOX:
                             default:
                                 retset.BrickURL = "https://www.bricklink.com/v2/search.page?q=" + retset.Number;
                                 break;
-                        }                        
+                        }
                         //clean URL, sometimes it comes without the http
-                        if (retset.ThumbnailUrl.Length>0)
-                            if(retset.ThumbnailUrl.IndexOf("http",StringComparison.CurrentCultureIgnoreCase)<0)
+                        if (retset.ThumbnailUrl.Length > 0)
+                            if (retset.ThumbnailUrl.IndexOf("http", StringComparison.CurrentCultureIgnoreCase) < 0)
                             {
                                 retset.ThumbnailUrl = "http:" + retset.ThumbnailUrl;
                             }
@@ -81,7 +82,7 @@ namespace BrickBot.Services.Bricklink
                         }
                         catch (Exception)
                         {
-                            retset.Theme ="";
+                            retset.Theme = "";
                         }
                         //get all the prices details
                         PriceGuideItem retPrice = GetPriceGuide(retobjdeser.data.no, typedesc, false);
@@ -232,6 +233,83 @@ namespace BrickBot.Services.Bricklink
             StreamReader reader = new StreamReader(dataStream);
             // Read the content.
             return reader.ReadToEnd();
+        }
+
+        public bool CanGetSetInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetPartInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetInstructionsInfo()
+        {
+            return false;
+        }
+
+        public bool CanGetMinifigInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetGearInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetBookInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetCatalogInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetMOCInfo()
+        {
+            return false;
+        }
+
+        public BrickItem GetBrickInfo(string number, ItemType typedesc)
+        {
+            switch (typedesc)
+            {
+                case ItemType.Set:
+                    var ret = GetCatalogItem(number, TypeDescription.SET);
+                    if (ret == null)
+                    {
+                        number += "-1";
+                        ret = GetCatalogItem(number, TypeDescription.SET);
+                    }
+                    return ret;
+                case ItemType.Minifig:
+                case ItemType.Part:
+                case ItemType.Book:
+                case ItemType.Gear:
+                case ItemType.Catalog:
+                    return GetCatalogItem(number, (TypeDescription)typedesc);
+                case ItemType.Instruction:
+                case ItemType.MOC:
+                case ItemType.Other:
+                default:
+                    return null;
+                    break;
+            }
+        }
+
+        public ServiceProvider GetServiceProvider
+        {
+            get { return ServiceProvider.Bricklink; }
+        }
+
+        public List<ItemType> GetSupportedInfo
+        {
+            get { return new List<ItemType>() { ItemType.Set, ItemType.Part, ItemType.Book, ItemType.Gear, ItemType.Minifig, ItemType.Catalog }; }
         }
     }
 }

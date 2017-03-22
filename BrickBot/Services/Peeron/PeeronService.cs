@@ -9,8 +9,82 @@ using System.Web;
 
 namespace BrickBot.Services.Peeron
 {
-    public class PeeronService
+    [Serializable]
+    public class PeeronService: IBrickService
     {
+        public bool CanGetBookInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetCatalogInfo()
+        {
+            return false;
+        }
+
+        public bool CanGetGearInfo()
+        {
+            return false;
+        }
+
+        public bool CanGetInstructionsInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetMinifigInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetMOCInfo()
+        {
+            return false;
+        }
+
+        public bool CanGetPartInfo()
+        {
+            return true;
+        }
+
+        public bool CanGetSetInfo()
+        {
+            return true;
+        }
+
+        public BrickItem GetBrickInfo(string number, ItemType typedesc)
+        {
+            switch (typedesc)
+            {
+                case ItemType.Minifig:
+                case ItemType.Part:
+                    //need to implement
+                    return null;
+                    break;
+                case ItemType.Set:
+                case ItemType.Book:
+                case ItemType.Instruction:
+                    return GetSetDetails(number);
+                    break;
+                case ItemType.Gear:
+                case ItemType.Catalog:
+                case ItemType.MOC:
+                case ItemType.Other:
+                default:
+                    return null;
+                    break;
+            }
+        }
+
+        public ServiceProvider GetServiceProvider
+        {
+            get { return ServiceProvider.Peeron; }
+        }
+        public List<ItemType> GetSupportedInfo
+        {
+            get { return new List<ItemType>() { ItemType.Set, ItemType.Instruction, ItemType.Part, ItemType.Minifig, ItemType.Book }; }
+        }
+
         public BrickItem GetSetDetails(string number)
         {
             string url = $"http://www.peeron.com/inv/sets/{number}";
@@ -130,5 +204,7 @@ namespace BrickBot.Services.Peeron
 
             return retitem;
         }
+
+        
     }
 }

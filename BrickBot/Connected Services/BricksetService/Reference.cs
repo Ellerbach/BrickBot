@@ -8,6 +8,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System;
+
 namespace BrickBot.BricksetService {
     
     
@@ -1810,7 +1812,7 @@ namespace BrickBot.BricksetService {
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     public interface BricksetAPIv2SoapChannel : BrickBot.BricksetService.BricksetAPIv2Soap, System.ServiceModel.IClientChannel {
     }
-    
+
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     public partial class BricksetAPIv2SoapClient : System.ServiceModel.ClientBase<BrickBot.BricksetService.BricksetAPIv2Soap>, BrickBot.BricksetService.BricksetAPIv2Soap {

@@ -141,6 +141,9 @@
   <data name="BricklinkSet" xml:space="preserve">
     <value>Set</value>
   </data>
+  <data name="BrickServiceSearchFor" xml:space="preserve">
+    <value>Select what you want to search</value>
+  </data>
   <data name="BricksetInstructions" xml:space="preserve">
     <value>Instructions</value>
   </data>
@@ -156,7 +159,7 @@
   <data name="CurrencyValue" xml:space="preserve">
     <value>usercurrency</value>
   </data>
-  <data name="InstructionsNumber" xml:space="preserve">
+  <data name="InstructionNumber" xml:space="preserve">
     <value>Give me the set number for instructions </value>
   </data>
   <data name="MinifigNumber" xml:space="preserve">
@@ -186,6 +189,9 @@
   <data name="SearchError" xml:space="preserve">
     <value>Brick broke, can't find what you're looking for. Please try again maybe with another number!</value>
   </data>
+  <data name="ServiceUsed" xml:space="preserve">
+    <value>ServiceUsed</value>
+  </data>
   <data name="SetNumber" xml:space="preserve">
     <value>Give me the set number</value>
   </data>
@@ -212,5 +218,11 @@
   </data>
   <data name="WhatSearFor" xml:space="preserve">
     <value>whatsearchfor</value>
+  </data>
+  <data name="CatalogNumber" xml:space="preserve">
+    <value>Give me the catalog number</value>
+  </data>
+  <data name="GearNumber" xml:space="preserve">
+    <value>Give me the gear number</value>
   </data>
 </root>
