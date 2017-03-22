@@ -69,8 +69,7 @@ namespace BrickBot.Dialogs
                 //}
 
                 if ((message.Text == BrickBotRes.WelcomeBricklink) || (message.Text == BrickBotRes.WelcomeBrickset) ||
-                    (message.Text == BrickBotRes.WelcomePeeron) || (message.Text == BrickBotRes.WelcomeRebrickable) ||
-                    (message.Text == BrickBotRes.WelcomeAll))
+                    (message.Text == BrickBotRes.WelcomePeeron) || (message.Text == BrickBotRes.WelcomeRebrickable))
                 {
                     await this.BrickService(context, result);
                     return;
@@ -90,11 +89,11 @@ namespace BrickBot.Dialogs
                 //    await this.Rebrickable(context);
                 //    return;
                 //}
-                //else if (message.Text == BrickBotRes.WelcomeAll)
-                //{
-                //    await this.BrickAll(context);
-                //    return;
-                //}
+                else if (message.Text == BrickBotRes.WelcomeAll)
+                {
+                    await this.BrickAll(context);
+                    return;
+                }
                 //else if (message.Text == BrickBotRes.WelcomePeeron)
                 //{
                 //    await this.Peeron(context);
@@ -541,7 +540,7 @@ namespace BrickBot.Dialogs
             }
             else if (message.Text == BrickBotRes.RebrickableMoc)
             {
-                retstr = BrickBotRes.MocNumber;
+                retstr = BrickBotRes.MOCNumber;
             }
             context.PrivateConversationData.SetValue(BrickBotRes.WhatSearFor, message.Text);
             if (retstr != "")
@@ -719,12 +718,15 @@ namespace BrickBot.Dialogs
             List<CardImage> cardImages = new List<CardImage>();
             cardImages.Add(new CardImage(url: $"{URL}/Images/bricklogo.png"));
             List<CardAction> cardButtons = new List<CardAction>();
-            cardButtons.Add(new CardAction() { Title = BrickBotRes.AllSet, Value = BrickBotRes.AllSet, Type = "postBack" });
-            cardButtons.Add(new CardAction() { Title = BrickBotRes.AllInstructions, Value = BrickBotRes.AllInstructions, Type = "postBack" });
+            foreach (var serv in Enum.GetValues(typeof(ItemType)))
+            {
+                cardButtons.Add(new CardAction() { Title = serv.ToString(), Value = serv.ToString(), Type = "postBack" });
+            }
+            //cardButtons.Add(new CardAction() { Title = BrickBotRes.AllSet, Value = BrickBotRes.AllSet, Type = "postBack" });
+            //cardButtons.Add(new CardAction() { Title = BrickBotRes.AllInstructions, Value = BrickBotRes.AllInstructions, Type = "postBack" });
             HeroCard plCard = new HeroCard()
             {
-                Title = "Select what you want to search",
-                //Subtitle = "Pig Latin Wikipedia Page",
+                Title = BrickBotRes.BrickServiceSearchFor,
                 Images = cardImages,
                 Buttons = cardButtons
             };
@@ -732,20 +734,24 @@ namespace BrickBot.Dialogs
             reply.Attachments.Add(plAttachment);
             await context.PostAsync(reply);
             context.Wait(this.OnOptionSelectedBrickAll);
-
         }
 
         private async Task OnOptionSelectedBrickAll(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
             var message = await result;
             string retstr = "";
-            if (message.Text == BrickBotRes.AllSet)
+            //if (message.Text == BrickBotRes.AllSet)
+            //{
+            //    retstr = BrickBotRes.SetNumber;
+            //}
+            //else if (message.Text == BrickBotRes.AllInstructions)
+            //{
+            //    retstr = BrickBotRes.InstructionNumber;
+            //}
+            foreach (var serv in Enum.GetValues(typeof(ItemType)))
             {
-                retstr = BrickBotRes.SetNumber;
-            }
-            else if (message.Text == BrickBotRes.AllInstructions)
-            {
-                retstr = BrickBotRes.InstructionNumber;
+                if (serv.ToString() == message.Text)
+                    retstr = BrickBotRes.ResourceManager.GetString($"{message.Text}Number");
             }
             context.PrivateConversationData.SetValue(BrickBotRes.WhatSearFor, message.Text);
             if (retstr != "")
@@ -765,69 +771,89 @@ namespace BrickBot.Dialogs
                 string whatyouwant;
                 //need to implement a way to check the currncy.
                 context.PrivateConversationData.TryGetValue(BrickBotRes.WhatSearFor, out whatyouwant);
+                reply.Attachments = new List<Attachment>();
 
-                if ((whatyouwant == BrickBotRes.AllSet) || (whatyouwant == BrickBotRes.AllInstructions))
+                foreach (var bs in brickservices)
                 {
-                    //need to make the services similar to be able to call generic function
-                    //so far old way
-                    BricklinkService bricklink = new BricklinkService();
-                    var retbrick = bricklink.GetCatalogItem(number, Models.Bricklink.TypeDescription.SET);
-                    if (retbrick == null)
+                    if (bs.GetSupportedInfo.Where(x => x.ToString() == whatyouwant).Any())
                     {
-                        number += "-1";
-                        retbrick = bricklink.GetCatalogItem(number, Models.Bricklink.TypeDescription.SET);
+                        ItemType item;
+                        var ret = Enum.TryParse<ItemType>(whatyouwant, out item);
+                        if (ret)
+                        {
+                            var retbrick = bs.GetBrickInfo(number, item);
+                            if (retbrick != null)
+                            {
+                                var replytmp = BuildMessage(context, retbrick);
+                                reply.Attachments.Add(replytmp.Attachments.First());
+                            }
+                        }
                     }
-                    if (retbrick == null)
-                        reply.Text = BrickBotRes.SearchError;
-                    else
-                    {
-                        reply = BuildMessage(context, retbrick);
-                    }
-                    await context.PostAsync(reply);
-                    BricksetServiceAPI brickset = new BricksetServiceAPI();
-                    retbrick = brickset.getSets(number);
-                    if (retbrick == null)
-                    {
-                        number += "-1";
-                        retbrick = brickset.getSets(number);
-                    }
-                    if (retbrick == null)
-                        reply.Text = BrickBotRes.SearchError;
-                    else
-                    {
-                        reply = BuildMessage(context, retbrick);
-                    }
-                    await context.PostAsync(reply);
-                    RebrickableService rebrickable = new RebrickableService();
-                    retbrick = rebrickable.GetSetInfo(number);
-                    if (retbrick == null)
-                    {
-                        number += "-1";
-                        retbrick = rebrickable.GetSetInfo(number);
-                    }
-                    if (retbrick == null)
-                        reply.Text = BrickBotRes.SearchError;
-                    else
-                    {
-                        reply = BuildMessage(context, retbrick);
-                    }
-                    await context.PostAsync(reply);
-                    PeeronService peeron = new PeeronService();
-                    retbrick = peeron.GetSetDetails(number);
-                    if (retbrick == null)
-                        reply.Text = BrickBotRes.SearchError;
-                    else
-                    {
-                        reply = BuildMessage(context, retbrick);
-                    }
-                    await context.PostAsync(reply);
                 }
-                else
-                {
-                    reply.Text = BrickBotRes.BrickBotError;
-                    reply.TextFormat = "markdown";
-                    await context.PostAsync(reply);
-                }
+                await context.PostAsync(reply);
+
+                //if ((whatyouwant == BrickBotRes.AllSet) || (whatyouwant == BrickBotRes.AllInstructions))
+                //{
+                //    //need to make the services similar to be able to call generic function
+                //    //so far old way
+                //    BricklinkService bricklink = new BricklinkService();
+                //    var retbrick = bricklink.GetCatalogItem(number, Models.Bricklink.TypeDescription.SET);
+                //    if (retbrick == null)
+                //    {
+                //        number += "-1";
+                //        retbrick = bricklink.GetCatalogItem(number, Models.Bricklink.TypeDescription.SET);
+                //    }
+                //    if (retbrick == null)
+                //        reply.Text = BrickBotRes.SearchError;
+                //    else
+                //    {
+                //        reply = BuildMessage(context, retbrick);
+                //    }
+                //    await context.PostAsync(reply);
+                //    BricksetServiceAPI brickset = new BricksetServiceAPI();
+                //    retbrick = brickset.getSets(number);
+                //    if (retbrick == null)
+                //    {
+                //        number += "-1";
+                //        retbrick = brickset.getSets(number);
+                //    }
+                //    if (retbrick == null)
+                //        reply.Text = BrickBotRes.SearchError;
+                //    else
+                //    {
+                //        reply = BuildMessage(context, retbrick);
+                //    }
+                //    await context.PostAsync(reply);
+                //    RebrickableService rebrickable = new RebrickableService();
+                //    retbrick = rebrickable.GetSetInfo(number);
+                //    if (retbrick == null)
+                //    {
+                //        number += "-1";
+                //        retbrick = rebrickable.GetSetInfo(number);
+                //    }
+                //    if (retbrick == null)
+                //        reply.Text = BrickBotRes.SearchError;
+                //    else
+                //    {
+                //        reply = BuildMessage(context, retbrick);
+                //    }
+                //    await context.PostAsync(reply);
+                //    PeeronService peeron = new PeeronService();
+                //    retbrick = peeron.GetSetDetails(number);
+                //    if (retbrick == null)
+                //        reply.Text = BrickBotRes.SearchError;
+                //    else
+                //    {
+                //        reply = BuildMessage(context, retbrick);
+                //    }
+                //    await context.PostAsync(reply);
+                //}
+                //else
+                //{
+                //    reply.Text = BrickBotRes.BrickBotError;
+                //    reply.TextFormat = "markdown";
+                //    await context.PostAsync(reply);
+                //}
 
                 //reply.Text = strresp;
 
@@ -896,7 +922,7 @@ namespace BrickBot.Dialogs
             // check what is selected and make sure it is part of supported features
             foreach (var serv in bs.First().GetSupportedInfo)
             {
-                if(serv.ToString().ToLowerInvariant() == message.Text.ToLowerInvariant())
+                if (serv.ToString().ToLowerInvariant() == message.Text.ToLowerInvariant())
                 {
                     retstr = BrickBotRes.ResourceManager.GetString($"{message.Text}Number");
                 }
@@ -940,7 +966,7 @@ namespace BrickBot.Dialogs
                 context.PrivateConversationData.TryGetValue(BrickBotRes.WhatSearFor, out whatyouwant);
                 ItemType selectitem;
                 var retok = Enum.TryParse<ItemType>(whatyouwant, out selectitem);
-                if (!bs.Any()||(!retok))
+                if (!bs.Any() || (!retok))
                 {
                     reply.Text = BrickBotRes.BrickBotError;
                     await context.PostAsync(reply);

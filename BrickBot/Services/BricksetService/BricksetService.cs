@@ -152,7 +152,6 @@ namespace BrickBot.Services.BricksetService
                 case ItemType.Gear:
                 case ItemType.Catalog:
                 case ItemType.MOC:
-                case ItemType.Other:
                 case ItemType.Minifig:
                 default:
                     return null;

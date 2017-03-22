@@ -58,8 +58,7 @@ namespace BrickBot.Services.Peeron
             {
                 case ItemType.Minifig:
                 case ItemType.Part:
-                    //need to implement
-                    return null;
+                    return GetPartDetails(number);
                     break;
                 case ItemType.Set:
                 case ItemType.Book:
@@ -69,7 +68,6 @@ namespace BrickBot.Services.Peeron
                 case ItemType.Gear:
                 case ItemType.Catalog:
                 case ItemType.MOC:
-                case ItemType.Other:
                 default:
                     return null;
                     break;
@@ -205,6 +203,88 @@ namespace BrickBot.Services.Peeron
             return retitem;
         }
 
-        
+        public BrickItem GetPartDetails(string number)
+        {
+            string url = $"http://www.peeron.com/inv/parts/{number}";
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            Stream dataStream = response.GetResponseStream();
+            // Open the stream using a StreamReader for easy access.
+            StreamReader reader = new StreamReader(dataStream);
+            // Read the content.
+            var pagecontent = reader.ReadToEnd();
+            BrickItem retitem = new BrickItem();
+            retitem.BrickURL = url;
+            
+            //find instructions
+            string instruct = pagecontent;
+            string magicinstructions = $"({number})";
+            string magicend = $"<a href=\"/inv/parts/{number}?ignorepat=y\">Include patterns</a>";
+            const string magichref = "<a href=\"";
+            string name;
+            int idx = 0;
+            if (instruct.IndexOf(magicinstructions) > 0)
+            {
+                instruct = instruct.Substring(instruct.IndexOf(magicinstructions) + magicinstructions.Length);
+                instruct = instruct.Substring(0, instruct.IndexOf(magicend));
+                //find all the <a href
+                name = instruct;
+                int count = 0;
+                do
+                {
+                    idx = name.IndexOf(magichref);
+                    if (idx > 0)
+                    {
+                        count++;
+                        name = name.Substring(idx + magichref.Length);
+                    }
+                } while (idx > 0);
+                if (count > 0)
+                {
+                    retitem.Instructions = new SetInstruction[count];
+                    for (int i = 0; i < count; i++)
+                    {
+                        retitem.Instructions[i] = new SetInstruction();
+                        idx = instruct.IndexOf(magichref);
+                        if (idx > 0)
+                        {
+
+                            instruct = instruct.Substring(idx + magichref.Length);
+                            url = instruct.Substring(0, instruct.IndexOf('"'));
+                            //check if it's a relative of abosulte
+                            if (!url.ToLower().Contains("http"))
+                            {
+                                url = "http://www.peeron.com" + url;
+                            }
+                            retitem.Instructions[i].URL = url;
+                            name = instruct.Substring(instruct.IndexOf('>') + 1);
+                            name = name.Substring(0, name.IndexOf('<'));
+                            retitem.Instructions[i].Name = name;
+                        }
+
+                    }
+                }
+            }
+            //try to extract image thumbnail
+            const string magicpicture = "id=\"setpic\"";
+            url = pagecontent.Substring(pagecontent.IndexOf(magicpicture) + magicpicture.Length);
+            url = url.Substring(url.IndexOf('"') + 1);
+            url = url.Substring(0, url.IndexOf('"'));
+            retitem.ThumbnailUrl = url;
+
+            retitem.BrickService = ServiceProvider.Peeron;
+            retitem.ItemType = ItemType.Set;
+            retitem.Number = number;
+            //try to extract the title
+            string magictitle = "Sets that have";
+            name = pagecontent.Substring(pagecontent.IndexOf(magictitle) + magictitle.Length);
+            name = name.Substring(name.IndexOf(':') + 2);
+            name = name.Substring(0, name.IndexOf('<'));
+            retitem.Name = name;
+            if (name == "Unknown part")
+                return null;
+
+            return retitem;
+        }
     }
 }

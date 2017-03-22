@@ -133,6 +133,8 @@ namespace BrickBot.Services.Rebrickable
         static private string ExecuteRequest(string url, WebParameterCollection param = null)
         {
             string req = url;
+            if (Apikey == "")
+                Apikey = ConfigurationManager.AppSettings["rebrickableapikey"];
             req += "?key=" + Apikey;
             if (param != null)
             {
@@ -224,7 +226,6 @@ namespace BrickBot.Services.Rebrickable
                         ret = GetMOCInfo(number);
                     }
                     return ret;
-                case ItemType.Other:
                 case ItemType.Instruction:
                 case ItemType.Catalog:
                 case ItemType.Gear:

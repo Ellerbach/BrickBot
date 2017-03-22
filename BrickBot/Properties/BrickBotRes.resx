@@ -165,7 +165,7 @@
   <data name="MinifigNumber" xml:space="preserve">
     <value>Give me the minifig number</value>
   </data>
-  <data name="MocNumber" xml:space="preserve">
+  <data name="MOCNumber" xml:space="preserve">
     <value>Give me the MOC number</value>
   </data>
   <data name="PartNumber" xml:space="preserve">

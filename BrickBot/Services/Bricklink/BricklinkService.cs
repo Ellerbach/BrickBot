@@ -295,7 +295,6 @@ namespace BrickBot.Services.Bricklink
                     return GetCatalogItem(number, (TypeDescription)typedesc);
                 case ItemType.Instruction:
                 case ItemType.MOC:
-                case ItemType.Other:
                 default:
                     return null;
                     break;

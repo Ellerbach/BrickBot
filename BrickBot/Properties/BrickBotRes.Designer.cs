@@ -225,9 +225,9 @@ namespace BrickBot.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Give me the MOC number.
         /// </summary>
-        internal static string MocNumber {
+        internal static string MOCNumber {
             get {
-                return ResourceManager.GetString("MocNumber", resourceCulture);
+                return ResourceManager.GetString("MOCNumber", resourceCulture);
             }
         }
         
