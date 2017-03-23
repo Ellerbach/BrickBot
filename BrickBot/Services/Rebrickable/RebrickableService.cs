@@ -48,14 +48,18 @@ namespace BrickBot.Services.Rebrickable
                 retitem.ThumbnailUrl = retobjdeser.set_img_url;
                 retitem.ItemType = ItemType.Set;
                 retitem.YearReleased = retobjdeser.year;
-                retitem.Theme = Categories.Where(x => x.id == retobjdeser.theme_id).First().name;
+                if (Categories == null)
+                    Categories = GetThemes();
+                if (Categories != null)
+                    retitem.Theme = Categories.Where(x => x.id == retobjdeser.theme_id).First().name;
                 retitem.BrickURL = retobjdeser.set_url;
                 retitem.BrickService = ServiceProvider.Rebrickable;
             }
             catch (Exception)
             {
+                return null;
             }
-            
+
             return retitem;
 
         }
@@ -75,13 +79,17 @@ namespace BrickBot.Services.Rebrickable
                 retitem.ThumbnailUrl = retobjdeser.moc_img_url;
                 retitem.ItemType = ItemType.MOC;
                 retitem.YearReleased = retobjdeser.year;
-                retitem.Theme = Categories.Where(x => x.id == retobjdeser.theme_id).First().name;
+                if (Categories == null)
+                    Categories = GetThemes();
+                if (Categories != null)
+                    retitem.Theme = Categories.Where(x => x.id == retobjdeser.theme_id).First().name;
                 retitem.BrickURL = retobjdeser.moc_url;
                 retitem.BrickService = ServiceProvider.Rebrickable;
             }
             catch (Exception)
             {
-            } 
+                return null;
+            }
             return retitem;
         }
 
@@ -100,16 +108,19 @@ namespace BrickBot.Services.Rebrickable
                 retitem.ThumbnailUrl = retobjdeser.part_img_url;
                 retitem.ItemType = ItemType.MOC;
                 retitem.YearReleased = retobjdeser.year_from;
-                retitem.Theme = Categories.Where(x => x.id == retobjdeser.part_cat_id).First().name;
+                if (Categories == null)
+                    Categories = GetThemes();
+                if (Categories != null)
+                    retitem.Theme = Categories.Where(x => x.id == retobjdeser.part_cat_id).First().name;
                 retitem.BrickURL = retobjdeser.part_url;
                 retitem.BrickService = ServiceProvider.Rebrickable;
             }
             catch (Exception)
             {
 
-                
+                return null;
             }
-            
+
             return retitem;
         }
 
@@ -127,7 +138,7 @@ namespace BrickBot.Services.Rebrickable
 
                 return null;
             }
-            
+
         }
 
         static private string ExecuteRequest(string url, WebParameterCollection param = null)
@@ -216,11 +227,9 @@ namespace BrickBot.Services.Rebrickable
                         ret = GetSetInfo(number);
                     }
                     return ret;
-                
-                    return GetSetInfo(number);
                 case ItemType.MOC:
                     ret = GetMOCInfo(number);
-                    if(ret == null)
+                    if (ret == null)
                     {
                         number = "MOC-" + number;
                         ret = GetMOCInfo(number);
@@ -232,7 +241,6 @@ namespace BrickBot.Services.Rebrickable
                 case ItemType.Minifig:
                 default:
                     return null;
-                    break;
             };
         }
 
